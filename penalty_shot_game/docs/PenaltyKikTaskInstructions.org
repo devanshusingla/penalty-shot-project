@@ -1,0 +1,64 @@
+#+Title: Penalty Kick
+#+Author: Task Instructions
+#+EMAIL:
+
+#+OPTIONS: reveal_center:t reveal_progress:t reveal_history:nil reveal_control:t
+#+OPTIONS: reveal_mathjax:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1200 reveal_height:800 toc:nil
+#+REVEAL_MARGIN: 0.1
+#+REVEAL_MIN_SCALE: 0.5
+#+REVEAL_MAX_SCALE: 2.5
+#+REVEAL_TRANS: none
+#+REVEAL_THEME: white
+#+REVEAL_HLEVEL: 2
+#+REVEAL_PLUGINS: (highlight markdown notes)
+#+REVEAL_EXTRA_CSS: ./presentation.css
+#+REVEAL_ROOT: ./reveal.js
+
+#+BEGIN_NOTES
+These are copied from "PenaltyKik Task Instructions.pptx" a powerpoint that Taylor put together
+for the first version of the task, data collected summer and fall 2014. 
+#+END_NOTES
+
+* General Overview of the Task
+- Social Decision Making Task
+- Similar structure to Pong
+- Computerized game utilizing joysticks to score points against an
+  opponent
+
+* Practice with Joystick
+#+BEGIN_HTML
+<img src="JoystickPractice.png" width="70%" height="70%"/>
+#+END_HTML
+
+* Practice Runs
+- We will begin with a practice run so you can get a feel for the
+  task. During this time, you will be playing against the experimenter
+  and points will not be counted.
+  
+* Fixation crosses
+- First you will see white fixation crosses against a black
+  background. Please focus your attention on these white crosses.
+
+* Pictures of Your Opponent
+- You will then see a picture of your opponent. This could you be your
+  human opponent, whom you will meet before the scan, or a picture
+  indicating the trial will be against the computer opponent. (During
+  the practice session, you will see a picture of a smiley face to
+  indicate that the trial is against the experimenter).
+- It is VERY IMPORTANT that you keep the joystick straight and in the
+  center during the period the picture of your opponent is on the
+  screen, or else the trial will not continue.
+
+* Game
+- During game play, you will control the movement of the ball with the
+  joystick. Your purpose is to cross the goal with the ball and make
+  it past the bar (controlled by the goalkeeper).
+- Note: the edges of the bar are "sticky", and thus touching them will
+  keep you from crossing the goal line.
+
+* Payment
+- You will receive $35 plus a $10 bonus for an accuracy rate above
+  33%. That is, if you score on more than 33% of trials, you will
+  receive the bonus.
+- Good luck and have fun! Any questions?

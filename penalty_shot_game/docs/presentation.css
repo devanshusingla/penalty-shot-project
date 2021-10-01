@@ -1,0 +1,8 @@
+.reveal section img {
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    background:none;
+    border:none;
+    box-shadow:none;
+}
