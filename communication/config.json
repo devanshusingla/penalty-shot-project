@@ -1,0 +1,8 @@
+{
+    "host": "127.0.0.1",
+    "port": 22345,
+    "msg length": 256,
+    "initial time lapse": 0.5,
+    "frame time lapse": 0.05,
+    "final time lapse": 0.5
+}
