@@ -208,7 +208,7 @@ class PSE(gym.Env):
     puck_x, puck_y = puck_pos
     puck_x = (puck_x+1)*self.screen_width/2
     puck_y = (puck_y+1)*self.screen_height/2
-    self.pucktrans = rendering.Transform(translation=(puck_x, puck_y))
+    self.pucktrans.set_translation(puck_x, puck_y)
 
     return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
