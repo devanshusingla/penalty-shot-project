@@ -9,7 +9,7 @@ class PSE(gym.Env):
         'video.frames_per_second': 50
     }
 
-  # Initializing environment with alpha and beta and also a seed value for random operations
+  # Initializing environment with defaults and a seed value for random operations
   def __init__(
     self, 
     main_seed=0,
@@ -39,9 +39,9 @@ class PSE(gym.Env):
     self.puck_start = puck_start
     self.bar_start = bar_start
     self.screen_height,self.screen_width = screen_size
-    self.goal_nrm = 0.77
+    self.goal_nrm = goal_nrm
     self.bar_length, self.bar_width = bar_size
-    self.puck_diameter = 1/64
+    self.puck_diameter = puck_diameter
 
     self.state = None
     self.viewer = None # Rendering object
@@ -183,7 +183,9 @@ class PSE(gym.Env):
             ## Initialise puck geometry object
             puck_x, puck_y = puck_pos
             puck = rendering.make_circle(self.puck_diameter*self.screen_width/2)
-            self.pucktrans = rendering.Transform(translation=((puck_x+1)*self.screen_width/2, (puck_y+1)*self.screen_height/2))
+            puck_x = (puck_x+1)*self.screen_width/2
+            puck_y = (puck_y+1)*self.screen_height/2
+            self.pucktrans = rendering.Transform(translation=(puck_x, puck_y))
             puck.add_attr(self.pucktrans)
             puck.set_color(.5, .5, .8)
             self.viewer.add_geom(puck)
@@ -204,7 +206,9 @@ class PSE(gym.Env):
 
     ## Update puck position
     puck_x, puck_y = puck_pos
-    self.pucktrans.set_translation((puck_x+1)*self.screen_width/2, (puck_y+1)*self.screen_height/2)
+    puck_x = (puck_x+1)*self.screen_width/2
+    puck_y = (puck_y+1)*self.screen_height/2
+    self.pucktrans = rendering.Transform(translation=(puck_x, puck_y))
 
     return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
