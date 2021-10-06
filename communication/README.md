@@ -12,4 +12,4 @@ Once the agent is connected, you can give action using step function of `PSClien
 
 You can close the connection in between using close function of `PSClient` object.
 
-Sample test code for puck and bar agent have been given in `puck_connect.py` and `bar_connect.py` files. To test simply start a server if not started and in separate terminals run both these files.
+Sample test code for puck and bar agent have been given in `agent_puck.py` and `agent_bar.py` files. To test simply start a server if not started and in separate terminals run both these files.
