@@ -1,8 +1,9 @@
 import socket, pickle, json, time
 from _thread import *
 from threading import Event
+from importlib.resources import open_text
 
-with open('config.json') as f:
+with open_text('communication','config.json') as f:
     config = json.load(f)
     host = config['host']
     port = config['port']
@@ -21,6 +22,14 @@ class PSServer:
         self.agents_ready = Event()
     
     def start(self):
+        start_new_thread(self.run_server, ())
+
+        while True:
+            self.agents_ready.wait()
+            self.play()
+            self.agents_ready.clear()
+    
+    def run_server(self):
         server_sock = socket.socket()
         print("server socket created successfully")
 
@@ -29,8 +38,6 @@ class PSServer:
 
         server_sock.listen(2)
         print("socket is listening")
-
-        start_new_thread(self.play, ())
 
         while True:
             sock, addr = server_sock.accept()
@@ -66,50 +73,47 @@ class PSServer:
             self.agents_ready.set()
 
     def play(self):
-        while True:
-            self.agents_ready.wait()
-            msg_puck = self.puck.recv(msg_length)
-            msg_bar = self.bar.recv(msg_length)
+        msg_puck = self.puck.recv(msg_length)
+        msg_bar = self.bar.recv(msg_length)
 
-            if msg_puck.decode() != 'start' or msg_bar.decode() != 'start':
-                print("agents not starting game")
+        if msg_puck.decode() != 'start' or msg_bar.decode() != 'start':
+            print("agents not starting game")
+            return
+
+        print("starting the game")
+
+        state, done = self.env.reset()
+
+        self.puck.send(pickle.dumps((state, done)))
+        self.bar.send(pickle.dumps((state, done)))
+        
+        time.sleep(initial_time_lapse)
+
+        self.env.render()
+        time.sleep(frame_time_lapse)
+        while not done:
+            puck_action = pickle.loads(self.puck.recv(msg_length))
+            bar_action = pickle.loads(self.bar.recv(msg_length))
+
+            if not puck_action or not bar_action:
+                print("an agent has been disconnected")
                 break
 
-            print("starting the game")
-
-            state, done = self.env.reset()
-
-            self.puck.send(pickle.dumps((state, done)))
-            self.bar.send(pickle.dumps((state, done)))
-            
-            time.sleep(initial_time_lapse)
+            res = self.env.step(puck_action, bar_action)
+            self.puck.send(pickle.dumps(res))
+            self.bar.send(pickle.dumps(res))
 
             self.env.render()
             time.sleep(frame_time_lapse)
-            while not done:
-                puck_action = pickle.loads(self.puck.recv(msg_length))
-                bar_action = pickle.loads(self.bar.recv(msg_length))
 
-                if not puck_action or not bar_action:
-                    print("an agent has been disconnected")
-                    break
+            done = res[2]
 
-                res = self.env.step(puck_action, bar_action)
-                self.puck.send(pickle.dumps(res))
-                self.bar.send(pickle.dumps(res))
+        print("quitting game")
 
-                self.env.render()
-                time.sleep(frame_time_lapse)
+        time.sleep(final_time_lapse)
 
-                done = res[2]
-
-            print("quitting game")
-
-            time.sleep(final_time_lapse)
-
-            self.env.close()
-            self.puck.close()
-            self.bar.close()
-            self.puck = None
-            self.bar = None
-            self.agents_ready.clear()
+        self.env.close()
+        self.puck.close()
+        self.bar.close()
+        self.puck = None
+        self.bar = None
