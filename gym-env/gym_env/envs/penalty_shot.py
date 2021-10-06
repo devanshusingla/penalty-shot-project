@@ -84,16 +84,19 @@ class PSE(gym.Env):
     bar_y = max(min(bar_y + v_w*bar_action, 1), -1)
 
     # Updating indicator variable
-    if (bar_action > 0):
-      if self.v_ind > 0:
+    if (bar_action >= 0.8):
+      if self.v_ind >= 0:
         self.v_ind = min(3, self.v_ind + 1)
       else:
-        self.v_ind = -1
-    else:
-      if self.v_ind < 0:
+        self.v_ind = 0
+    elif(bar_action <= -0.8):
+      if self.v_ind <= 0:
         self.v_ind = max(-3, self.v_ind - 1)
       else:
-        self.v_ind = 1
+        self.v_ind = 0
+    else :
+      self.v_ind = 0
+
 
     # Updating theta
     if np.abs(self.v_ind) == 3:
