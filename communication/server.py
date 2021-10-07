@@ -1,4 +1,5 @@
 import socket, pickle, json, time
+from queue import Queue
 from _thread import *
 from threading import Event
 from importlib.resources import open_text
@@ -92,12 +93,17 @@ class PSServer:
         self.env.render()
         time.sleep(frame_time_lapse)
         while not done:
-            puck_action = pickle.loads(self.puck.recv(msg_length))
-            bar_action = pickle.loads(self.bar.recv(msg_length))
-
-            if not puck_action or not bar_action:
-                print("an agent has been disconnected")
+            msg = self.puck.recv(msg_length)
+            if not msg:
+                print("agent puck disconnected")
                 break
+            puck_action = pickle.loads(msg)
+
+            msg = self.bar.recv(msg_length)
+            if not msg:
+                print("agent bar disconnected")
+                break
+            bar_action = pickle.loads(msg)
 
             res = self.env.step(puck_action, bar_action)
             self.puck.send(pickle.dumps(res))
