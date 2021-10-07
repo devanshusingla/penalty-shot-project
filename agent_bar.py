@@ -1,6 +1,4 @@
-from agents import PE
+from agents.device import MS
 
-agent = PE(id = 'B')
+agent = MS(id='B', time_interval=0.1)
 agent.run()
-
-# from agents.device import mouse
