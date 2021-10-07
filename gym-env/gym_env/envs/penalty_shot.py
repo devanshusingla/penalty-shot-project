@@ -48,7 +48,7 @@ class PSE(gym.Env):
 
     self.v_ind = 0 # Indicator variable used to check whether the bar can accelerate in next step
     self.theta = 1
-    self.startState = (self.puck_start, self.bar_start)
+    self.startState = (self.puck_start, self.bar_start, 0, 0)
     self.v_p = (self.goal_nrm - self.puck_start[0])/self.max_episodes
     self.bar_action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
     self.puck_action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)                    
@@ -70,7 +70,7 @@ class PSE(gym.Env):
     reward = (0, 0)
     done = False
     info = None
-    puck_pos, bar_pos = self.state
+    puck_pos, bar_pos, theta, v_ind = self.state
 
     ## Update puck position
     puck_x, puck_y = puck_pos
@@ -117,7 +117,7 @@ class PSE(gym.Env):
       reward = (-1, 1) # Positive reward for bar and Negative for puck
       done = True
 
-    self.state = ((puck_x, puck_y), (bar_x, bar_y))
+    self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind)
     info = {
       "v_ind":self.v_ind,
       "theta": self.theta
@@ -172,7 +172,7 @@ class PSE(gym.Env):
             ## Initialise screen viewer object
             self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
             
-            puck_pos, bar_pos = self.state
+            puck_pos, bar_pos, theta, v_ind = self.state
 
             ## Initialise bar geometry object
             bar = rendering.FilledPolygon(self.bar_vertices(bar_pos))
@@ -199,7 +199,7 @@ class PSE(gym.Env):
     if self.state is None:
         return None
 
-    puck_pos, bar_pos = self.state
+    puck_pos, bar_pos, theta, v_ind = self.state
 
     ## Update bar position
     bar = self._bar_geom

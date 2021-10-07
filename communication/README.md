@@ -6,7 +6,7 @@ The `PSServer` class present in `server.py` is used for creating server. It acce
 ## Connecting to Server
 The `PSClient` class present in `client.py` us used for connecting with server. It accepts id of agent as input. Here id represent whether the agent is playing as puck which is given by 'P' or as bar which is given by 'B'. Simply create an object of `PSClient` class with whatever role you want to play as.
 
-Calling its `connect` function will try to connect user to server. If position for the role is free, the agent will get connected and will recieve `(starting state, completion state)` as output otherwise it outputs `None`.
+Calling its `connect` function will try to connect user to server. If position for the role is free, the agent will get connected and will receive `(starting state, completion state)` as output otherwise it outputs `None`.
 
 Once the agent is connected, you can give action using step function of `PSClient` object and when the state has been updated on the server you will recieve the result tuple consisting of `(new state, reward, completion state, info)`
 
