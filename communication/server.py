@@ -1,8 +1,12 @@
 import socket, pickle, json, time
 from _thread import *
 from threading import Event
+from importlib.resources import open_text
+from matplotlib import animation
+import matplotlib.pyplot as plt
+import os
 
-with open('config.json') as f:
+with open_text('communication','config.json') as f:
     config = json.load(f)
     host = config['host']
     port = config['port']
@@ -12,15 +16,25 @@ with open('config.json') as f:
     final_time_lapse = config['final time lapse']
 
 class PSServer:
-    def __init__(self, env, port=port):
+    def __init__(self, env, port=port, save_run = False, save_path = "./"):
         self.env = env
         self.port = port
         self.bar = None
         self.puck = None
+        self.save_run = save_run
+        self.save_path = save_path
 
         self.agents_ready = Event()
     
     def start(self):
+        start_new_thread(self.run_server, ())
+
+        while True:
+            self.agents_ready.wait()
+            self.play()
+            self.agents_ready.clear()
+    
+    def run_server(self):
         server_sock = socket.socket()
         print("server socket created successfully")
 
@@ -29,8 +43,6 @@ class PSServer:
 
         server_sock.listen(2)
         print("socket is listening")
-
-        start_new_thread(self.play, ())
 
         while True:
             sock, addr = server_sock.accept()
@@ -66,50 +78,76 @@ class PSServer:
             self.agents_ready.set()
 
     def play(self):
-        while True:
-            self.agents_ready.wait()
-            msg_puck = self.puck.recv(msg_length)
-            msg_bar = self.bar.recv(msg_length)
+        msg_puck = self.puck.recv(msg_length)
+        msg_bar = self.bar.recv(msg_length)
 
-            if msg_puck.decode() != 'start' or msg_bar.decode() != 'start':
-                print("agents not starting game")
+        if msg_puck.decode() != 'start' or msg_bar.decode() != 'start':
+            print("agents not starting game")
+            return
+
+        print("starting the game")
+
+        state, done = self.env.reset()
+
+        self.puck.send(pickle.dumps((state, done)))
+        self.bar.send(pickle.dumps((state, done)))
+        
+        time.sleep(initial_time_lapse)
+
+        frames = []
+        self.env.render()
+        time.sleep(frame_time_lapse)
+        while not done:
+            puck_action = pickle.loads(self.puck.recv(msg_length))
+            bar_action = pickle.loads(self.bar.recv(msg_length))
+
+            if not puck_action or not bar_action:
+                print("an agent has been disconnected")
                 break
 
-            print("starting the game")
+            res = self.env.step(puck_action, bar_action)
+            self.puck.send(pickle.dumps(res))
+            self.bar.send(pickle.dumps(res))
 
-            state, done = self.env.reset()
-
-            self.puck.send(pickle.dumps((state, done)))
-            self.bar.send(pickle.dumps((state, done)))
-            
-            time.sleep(initial_time_lapse)
-
-            self.env.render()
-            time.sleep(frame_time_lapse)
-            while not done:
-                puck_action = pickle.loads(self.puck.recv(msg_length))
-                bar_action = pickle.loads(self.bar.recv(msg_length))
-
-                if not puck_action or not bar_action:
-                    print("an agent has been disconnected")
-                    break
-
-                res = self.env.step(puck_action, bar_action)
-                self.puck.send(pickle.dumps(res))
-                self.bar.send(pickle.dumps(res))
-
+            if(self.save_run):
+                frames.append(self.env.render(mode="rgb_array"))
+            else :
                 self.env.render()
-                time.sleep(frame_time_lapse)
 
-                done = res[2]
+            time.sleep(frame_time_lapse)
 
-            print("quitting game")
+            done = res[2]
 
-            time.sleep(final_time_lapse)
+        print("quitting game")
 
-            self.env.close()
-            self.puck.close()
-            self.bar.close()
-            self.puck = None
-            self.bar = None
-            self.agents_ready.clear()
+        time.sleep(final_time_lapse)
+
+        self.env.close()
+        self.puck.close()
+        self.bar.close()
+        self.puck = None
+        self.bar = None
+        if(self.save_run):
+            print("Saving run ...")
+            self.save_render(frames)
+    
+    def save_render(self, frames):
+        plt.figure(figsize=(frames[0].shape[1] / 150.0, frames[0].shape[0] / 150.0), dpi=150)
+
+        plt.axis('off')
+        patch = plt.imshow(frames[0])
+
+        def animate(i):
+            patch.set_data(frames[i])
+
+        anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(frames), interval=60)
+        writergif = animation.PillowWriter(fps=60)
+
+        #check if folder exists 
+        index = self.save_path.rfind("/")
+        folder_name = self.save_path[:index+1]
+        if(not os.path.isdir(folder_name)):
+            print("Made folder {}".format(folder_name))
+            os.mkdir(folder_name)
+
+        anim.save(self.save_path, writer = writergif)
