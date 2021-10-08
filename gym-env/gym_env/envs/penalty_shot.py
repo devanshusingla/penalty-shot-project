@@ -28,7 +28,8 @@ class PSE(gym.Env):
         maxEpisodes (int, optional): Maximum number of episodes. Defaults to 90.
         puck_start (tuple, optional): Normalised start (x, y) coordinates for the puck. Defaults to (-0.75, 0).
         bar_start (tuple, optional): Normalised start (x, y) coordinates for the bar. Defaults to (0.75, 0).
-        screen_size (tuple, optional): Actual screen size (height, width). Defaults to (480, 640).
+        screen_size (tuple, optional): A
+        ctual screen size (height, width). Defaults to (480, 640).
         goal_nrm (float, optional): Normalised x-coordinate defining the goal line. Defaults to 0.77.
         bar_size (tuple, optional): Normalised values for size of the bar (length, width). Defaults to (1/6, 1/128).
         puck_diameter (float, optional): Normalised diameter of the puck. Defaults to 1/64.
@@ -41,7 +42,8 @@ class PSE(gym.Env):
     self.screen_height,self.screen_width = screen_size
     self.goal_nrm = goal_nrm
     self.bar_length, self.bar_width = bar_size
-    self.puck_diameter = puck_diameter
+    self.bar_length, self.bar_width = 2*self.bar_length, 2*self.bar_width # Scale factor due to normalisation
+    self.puck_diameter = puck_diameter*2 # Scale factor due to normalisation
 
     self.state = None
     self.viewer = None # Rendering object
