@@ -1,7 +1,8 @@
 import socket, pickle, json
 from _thread import *
+from importlib.resources import open_text
 
-with open('config.json') as f:
+with open_text('communication','config.json') as f:
     config = json.load(f)
     host = config['host']
     port = config['port']
@@ -24,15 +25,23 @@ class PSClient:
             return None
         
         self.sock.send(str.encode('start'))
-        return pickle.loads(self.sock.recv(msg_length))
+        
+        msg = self.sock.recv(msg_length)
+        if not msg:
+            print("disconnected")
+            return None
+
+        return pickle.loads(msg)
         
 
     def step(self, action):
         self.sock.send(pickle.dumps(action))
-        res = pickle.loads(self.sock.recv(msg_length))
-
-        if not res:
+        
+        msg = self.sock.recv(msg_length)
+        if not msg:
             print("disconnected")
+            return None
+        res = pickle.loads(msg)
 
         return res
     

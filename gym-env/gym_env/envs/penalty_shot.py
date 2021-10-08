@@ -130,12 +130,11 @@ class PSE(gym.Env):
   # Resets the environment's random generators to enable reproducability.
   def reset(self, fullReset=False):
     self.state = self.startState
-    state = None
-    done = None
+    done = False
 
     if fullReset:
       self.rng = np.random.default_rng(seed=self.seed)
-    return state, done
+    return self.state, done
   
   # Creates seeds and random generator for environment
   def seed(self, mainSeed):
