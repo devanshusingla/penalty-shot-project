@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+from numpy.core.fromnumeric import shape
 
 class PSE(gym.Env):
 
@@ -49,14 +50,22 @@ class PSE(gym.Env):
     self.viewer = None # Rendering object
 
     self.v_ind = 0 # Indicator variable used to check whether the bar can accelerate in next step
-    self.theta = 1
+    self.theta = 0
     self.startState = (self.puck_start, self.bar_start, 0, 0)
     self.v_p = (self.goal_nrm - self.puck_start[0])/self.max_episodes
     self.bar_action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
-    self.puck_action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)                    
+    self.puck_action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
+
+    self.observation_space = gym.spaces.Tuple((
+      gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32),
+      gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32),
+      gym.spaces.Discrete(2*np.int32(np.sqrt(max_episodes))),
+      gym.spaces.Discrete(7),
+    ))
+    self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
   # Moves environment forward by 1 time step
-  def step(self, puck_action: float, bar_action: float):
+  def step(self, action: np.ndarray):
     """Take one step in the common environment
 
     Args:
@@ -69,14 +78,17 @@ class PSE(gym.Env):
         Done: If the episode is over
         Info: Dictionary of indicator variable and theta parameter
     """
-    reward = (0, 0)
+    reward = 0
     done = False
     info = None
     puck_pos, bar_pos, theta, v_ind = self.state
 
     ##Clamp puck and bar actions between [-1, 1]
-    puck_action = max(-1, min(1, puck_action))
-    bar_action = max(-1, min(1, bar_action))
+    puck_action = max(-1, min(1, action[0]))
+    bar_action = max(-1, min(1, action[1]))
+
+    if puck_action < -1.0 or puck_action > 1.0 or bar_action < -1.0 or bar_action > 1.0:
+      raise Exception('action overlow occurred')
 
     ## Update puck position
     puck_x, puck_y = puck_pos
@@ -86,11 +98,13 @@ class PSE(gym.Env):
 
     ## Update bar position
     bar_x, bar_y = bar_pos
-    v_w = 2*self.v_p*self.theta/3
+    v_w = 2*self.v_p*(1.0+0.85*self.theta)/3
     bar_y = max(min(bar_y + v_w*bar_action, 1), -1)
 
     # Updating indicator variable
-    if (bar_action >= 0.8):
+    if bar_y == 1.0 or bar_y == -1.0:
+      self.v_ind = 0
+    elif (bar_action >= 0.8):
       if self.v_ind >= 0:
         self.v_ind = min(3, self.v_ind + 1)
       else:
@@ -106,28 +120,25 @@ class PSE(gym.Env):
 
     # Updating theta
     if np.abs(self.v_ind) == 3:
-      self.theta += 0.85
+      self.theta += 1
     else:
-      self.theta = 1
+      self.theta = 0
 
     # Termination Condition
     if self.goal_nrm - (puck_x + self.puck_diameter/2) < 0.001:
       # Puck hits goal
-      reward = (1, -1) # Negative reward for bar and positive for puck
+      reward = 1 # Negative reward for bar and positive for puck
       done = True
     elif (
       abs(bar_x - puck_x) < (self.puck_diameter + self.bar_width)/2 
       and abs(bar_y - puck_y) < (self.puck_diameter + self.bar_length)/2
       ):
       # Bar stopped puck
-      reward = (-1, 1) # Positive reward for bar and Negative for puck
+      reward = -1 # Positive reward for bar and Negative for puck
       done = True
 
-    self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind)
-    info = {
-      "v_ind":self.v_ind,
-      "theta": self.theta
-    }
+    self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind+3)
+    info = {}
 
     return self.state, reward, done, info  # returns result tuple after action is taken
   
@@ -138,7 +149,7 @@ class PSE(gym.Env):
 
     if fullReset:
       self.rng = np.random.default_rng(seed=self.seed)
-    return self.state, done
+    return self.state
   
   # Creates seeds and random generator for environment
   def seed(self, mainSeed):
