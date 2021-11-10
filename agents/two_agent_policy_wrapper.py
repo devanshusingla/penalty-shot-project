@@ -28,7 +28,7 @@ class TwoAgentPolicy(BasePolicy):
             bar_batch['act'] = bar_batch['act'][:,1]
         
         if isinstance(batch['rew'], np.ndarray) or (isinstance(batch['rew'], Batch) and not batch['rew'].is_empty()):
-            bar_batch['rew'] = -1.0*bar_batch['rew']
+            puck_batch['rew'] = -1.0*puck_batch['rew']
 
         # if self.i <= 2:
             # print(puck_batch)
@@ -52,6 +52,14 @@ class TwoAgentPolicy(BasePolicy):
         
         puck_out = self.puck_policy.forward(puck_batch, state, **(other_params.get('bar', {})))
         bar_out = self.bar_policy.forward(bar_batch, state, **(other_params.get('puck', {})))
+
+        # if self.i == 0:
+        #     print("puck")
+        #     print(puck_out)
+        #     print("bar")
+        #     print(bar_out)
+
+        #     self.i += 1
 
         out = Batch(act=np.column_stack((puck_out.act, bar_out.act)), state=np.column_stack((puck_out.state, bar_out.state)) if puck_out.state is not None else None, params=Batch())
         out.params = Batch({

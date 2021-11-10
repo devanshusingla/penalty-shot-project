@@ -45,6 +45,7 @@ class PSE(gym.Env):
     self.bar_length, self.bar_width = bar_size
     self.bar_length, self.bar_width = 2*self.bar_length, 2*self.bar_width # Scale factor due to normalisation
     self.puck_diameter = puck_diameter*2 # Scale factor due to normalisation
+    self.step_count = 0
 
     self.state = None
     self.viewer = None # Rendering object
@@ -59,7 +60,7 @@ class PSE(gym.Env):
     self.observation_space = gym.spaces.Tuple((
       gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32),
       gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32),
-      gym.spaces.Discrete(2*np.int32(np.sqrt(max_episodes))),
+      gym.spaces.Discrete(4*np.int32(np.sqrt(max_episodes))),
       gym.spaces.Discrete(7),
     ))
     self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
@@ -127,24 +128,26 @@ class PSE(gym.Env):
     # Termination Condition
     if self.goal_nrm - (puck_x + self.puck_diameter/2) < 0.001:
       # Puck hits goal
-      reward = 1 # Negative reward for bar and positive for puck
+      reward = -1 # Negative reward for bar and positive for puck
       done = True
     elif (
       abs(bar_x - puck_x) < (self.puck_diameter + self.bar_width)/2 
       and abs(bar_y - puck_y) < (self.puck_diameter + self.bar_length)/2
       ):
       # Bar stopped puck
-      reward = -1 # Positive reward for bar and Negative for puck
+      reward = 1 # Positive reward for bar and Negative for puck
       done = True
 
     self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind+3)
-    info = {}
+    self.step_count += 1
+    info = {'steps': self.step_count}
 
     return self.state, reward, done, info  # returns result tuple after action is taken
   
   # Resets the environment's random generators to enable reproducability.
   def reset(self, fullReset=False):
     self.state = self.startState
+    self.step_count = 0
     done = False
 
     if fullReset:

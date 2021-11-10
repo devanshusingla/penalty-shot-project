@@ -1,5 +1,8 @@
 ## TODO
 
-- [ ] adding basic agent code for testing purpose for puck, bar and users.
-- [ ] developing good README for folders
-- [ ] adding comments in code.
+- [ ] Add policy based methods a3c, ppo, ddpg
+- [ ] graph of losses
+- [ ] dicrete action space
+
+
+- [ ] research policy
