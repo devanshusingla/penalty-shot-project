@@ -1,5 +1,25 @@
 # Penalty Shot Project
 
+## How to Setup and Run the Environment
+
+### Install tianshou and install gym-env
+```bash
+pip install tianshou
+pip install gym==0.19 -U
+pip install -e ./gym-env
+```
+### To Run:
+Open 3 terminals and run 
+```bash
+python ./start_server.py
+```
+```bash
+python ./agent_puck.py
+```
+```bash
+python ./agent_bar.py
+```
+
 ## Game Environment
 It consists of a puck and a bar with puck moving towards bar at constant horizontal speed. Both of them are controlled by separate agents. The goal of puck is to move past bar and reach final line while the goal of bar is to catch puck before it can reach final line.
 
