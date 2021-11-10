@@ -18,13 +18,21 @@ test_envs = ts.env.DummyVectorEnv([make_render_discrete_env for _ in range(5)])
 
 # creating policies
 
-p1 = SinePolicy()
-p2 = DQN(env.observation_space.shape, env.action_space['bar'].shape)(discount_factor=0.9, estimation_step=3, target_update_freq=320)
-policy = TwoAgentPolicy(observation_space=env.observation_space, action_space=env.action_space, policies=(p1, p2))
+policy_puck = SinePolicy()
+policy_bar = DQN(env.observation_space.shape, env.action_space["bar"].shape)(
+    discount_factor=0.9, estimation_step=3, target_update_freq=320
+)
+policy = TwoAgentPolicy(
+    observation_space=env.observation_space,
+    action_space=env.action_space,
+    policies=(policy_puck, policy_bar),
+)
 
 # setup collector
 
-train_collector = ts.data.Collector(policy, train_envs, ts.data.VectorReplayBuffer(2000, 10), exploration_noise=True)
+train_collector = ts.data.Collector(
+    policy, train_envs, ts.data.VectorReplayBuffer(2000, 10), exploration_noise=True
+)
 test_collector = ts.data.Collector(policy, test_envs, exploration_noise=True)
 
 # logging
@@ -33,15 +41,22 @@ test_collector = ts.data.Collector(policy, test_envs, exploration_noise=True)
 logger = WandbLogger(
     save_interval=1,
     project="Penalty-Shot-Game",
-    name='Devanshu Singla',
-    entity='dsingla',
-    run_id='your-api-key-available-on-website'
+    name="Devanshu Singla",
+    entity="dsingla",
+    run_id="your-api-key-available-on-website",
 )
 
 # training
 
 result = ts.trainer.offpolicy_trainer(
-    policy, train_collector, test_collector,
-    max_epoch=10, step_per_epoch=10000, step_per_collect=10,
-    update_per_step=0.1, episode_per_test=100, batch_size=64)#, logger=logger)
-print(f'Finished training! Use {result}')
+    policy,
+    train_collector,
+    test_collector,
+    max_epoch=10,
+    step_per_epoch=10000,
+    step_per_collect=10,
+    update_per_step=0.1,
+    episode_per_test=100,
+    batch_size=64,
+)  # , logger=logger)
+print(f"Finished training! Use {result}")
