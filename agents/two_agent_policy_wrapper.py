@@ -23,9 +23,9 @@ class TwoAgentPolicy(BasePolicy):
         puck_batch = batch
         bar_batch = deepcopy(batch)
 
-        if isinstance(batch['act'], np.ndarray) or (isinstance(batch['act'], Batch) and not batch['act'].is_empty()):
-            puck_batch['act'] = puck_batch['act'][:,0]
-            bar_batch['act'] = bar_batch['act'][:,1]
+        if not batch['act'].is_empty():
+            puck_batch['act'] = puck_batch['act']['puck']
+            bar_batch['act'] = bar_batch['act']['bar']
         
         if isinstance(batch['rew'], np.ndarray) or (isinstance(batch['rew'], Batch) and not batch['rew'].is_empty()):
             puck_batch['rew'] = -1.0*puck_batch['rew']
@@ -36,6 +36,9 @@ class TwoAgentPolicy(BasePolicy):
 
         return (puck_batch, bar_batch)
 
+    '''
+        This function is called by collector.
+    '''
     def forward(
         self,
         batch: Batch,
@@ -61,7 +64,7 @@ class TwoAgentPolicy(BasePolicy):
 
         #     self.i += 1
 
-        out = Batch(act=np.column_stack((puck_out.act, bar_out.act)), state=np.column_stack((puck_out.state, bar_out.state)) if puck_out.state is not None else None, params=Batch())
+        out = Batch(act=Batch(puck=puck_out.act, bar=bar_out.act), state=np.column_stack((puck_out.state, bar_out.state)) if puck_out.state is not None else None, params=Batch())
         out.params = Batch({
             'puck': Batch({key: val for key,val in puck_out.items() if key not in ['act', 'state']}),
             'bar': Batch({key: val for key,val in bar_out.items() if key not in ['act', 'state']})
@@ -78,6 +81,10 @@ class TwoAgentPolicy(BasePolicy):
 
         return out
     
+
+    '''
+        These three functions are called in update function of BasePolicy in the order process_fn -> learn -> post_process_fn one after another.
+    '''
     def process_fn(
         self, batch: Batch, buffer: ReplayBuffer, indices: np.ndarray
     ) -> Batch:

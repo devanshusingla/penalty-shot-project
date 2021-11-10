@@ -5,3 +5,5 @@ __pycache__/
 
 sample_runs/
 .DS_Store
+
+wandb/

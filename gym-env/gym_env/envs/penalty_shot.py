@@ -63,7 +63,10 @@ class PSE(gym.Env):
       gym.spaces.Discrete(4*np.int32(np.sqrt(max_episodes))),
       gym.spaces.Discrete(7),
     ))
-    self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+    self.action_space = gym.spaces.Dict({
+      'puck': gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32),
+      'bar': gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+    })
 
   # Moves environment forward by 1 time step
   def step(self, action: np.ndarray):
@@ -85,8 +88,8 @@ class PSE(gym.Env):
     puck_pos, bar_pos, theta, v_ind = self.state
 
     ##Clamp puck and bar actions between [-1, 1]
-    puck_action = max(-1, min(1, action[0]))
-    bar_action = max(-1, min(1, action[1]))
+    puck_action = max(-1, min(1, action['puck']))
+    bar_action = max(-1, min(1, action['bar']))
 
     if puck_action < -1.0 or puck_action > 1.0 or bar_action < -1.0 or bar_action > 1.0:
       raise Exception('action overlow occurred')
