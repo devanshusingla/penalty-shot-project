@@ -67,8 +67,8 @@ class PSE(gym.Env):
       gym.spaces.Discrete(7),
     ))
     self.action_space = gym.spaces.Dict({
-      'puck': gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32),
-      'bar': gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+      'puck': gym.spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32),
+      'bar': gym.spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
     })
 
   # Moves environment forward by 1 time step
