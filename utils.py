@@ -6,15 +6,16 @@ import numpy as np
 
 # https://github.com/thu-ml/tianshou/issues/192 to enable rendering wrapper
 class RenderEnvWrapper(gym.Wrapper):
-    def __init__(self, env):
+    def __init__(self, env, render_eps):
         super().__init__(env)
         self.do_render = False
+        self.render_eps = render_eps
 
     def step(self, action):
         obs, rew, done, info = self.env.step(action)
         if done:
             eps = np.random.rand()
-            if eps < 0.02:
+            if eps < self.render_eps:
                 self.do_render = True
             else:
                 self.do_render = False
@@ -51,16 +52,16 @@ def make_discrete_env(k: int = 7):
     )
 
 
-def make_render_discrete_env(k: int = 7):
+def make_render_discrete_env(render_eps, k: int = 7):
     return DiscreteActionWrapper(
         gym.wrappers.FlattenObservation(
-            RenderEnvWrapper(gym.make("gym_env:penalty-shot-v0"))
+            RenderEnvWrapper(gym.make("gym_env:penalty-shot-v0"), render_eps)
         ),
         k=k,
     )
 
 
-def make_render_env():
+def make_render_env(render_eps):
     return gym.wrappers.FlattenObservation(
-        RenderEnvWrapper(gym.make("gym_env:penalty-shot-v0"))
+        RenderEnvWrapper(gym.make("gym_env:penalty-shot-v0"), render_eps)
     )

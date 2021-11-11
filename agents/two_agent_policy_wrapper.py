@@ -11,11 +11,9 @@ from copy import deepcopy
 
 
 class TwoAgentPolicy(BasePolicy):
-    
     def __init__(self, policies: Tuple[BasePolicy, BasePolicy], **kwargs):
         super().__init__(**kwargs)
         (self.puck_policy, self.bar_policy) = policies
-        self.i = 0
 
     def _partition_batch(self, batch: Batch):
         puck_batch = batch
@@ -80,6 +78,11 @@ class TwoAgentPolicy(BasePolicy):
         )
 
         return out
+
+    def map_action(self, act):
+        act["bar"] = self.bar_policy.map_action(act["bar"])
+        act["puck"] = self.puck_policy.map_action(act["puck"])
+        return act
 
     """
         These three functions are called in update function of BasePolicy in the order process_fn -> learn -> post_process_fn one after another.
