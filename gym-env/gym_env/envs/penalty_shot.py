@@ -20,7 +20,8 @@ class PSE(gym.Env):
     screen_size=(480, 640),
     goal_nrm = 0.77,
     bar_size=(1/6, 1/128),
-    puck_diameter=1/64
+    puck_diameter=1/64,
+    random_bar_start: bool = False,
     ):
     """Penalty Shot Environment
 
@@ -40,6 +41,8 @@ class PSE(gym.Env):
     self.max_episodes = max_episodes
     self.puck_start = puck_start
     self.bar_start = bar_start
+    if random_bar_start:
+      self.bar_start = (bar_start[0], self.mainRng.uniform(-1, 1))
     self.screen_height,self.screen_width = screen_size
     self.goal_nrm = goal_nrm
     self.bar_length, self.bar_width = bar_size
@@ -52,7 +55,7 @@ class PSE(gym.Env):
 
     self.v_ind = 0 # Indicator variable used to check whether the bar can accelerate in next step
     self.theta = 0
-    self.startState = (self.puck_start, self.bar_start, 0, 0)
+    self.startState = (self.puck_start, self.bar_start, 0, 3)
     self.v_p = (self.goal_nrm - self.puck_start[0])/self.max_episodes
     self.bar_action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
     self.puck_action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
@@ -131,15 +134,17 @@ class PSE(gym.Env):
     # Termination Condition
     if self.goal_nrm - (puck_x + self.puck_diameter/2) < 0.001:
       # Puck hits goal
-      reward = -1 # Negative reward for bar and positive for puck
+      # reward = -1 # Negative reward for bar and positive for puck
       done = True
+      reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
     elif (
       abs(bar_x - puck_x) < (self.puck_diameter + self.bar_width)/2 
       and abs(bar_y - puck_y) < (self.puck_diameter + self.bar_length)/2
       ):
       # Bar stopped puck
-      reward = 1 # Positive reward for bar and Negative for puck
+      # reward = 1 # Positive reward for bar and Negative for puck
       done = True
+      reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
 
     self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind+3)
     self.step_count += 1
@@ -154,7 +159,7 @@ class PSE(gym.Env):
     done = False
 
     if fullReset:
-      self.rng = np.random.default_rng(seed=self.seed)
+      self.mainRng = np.random.default_rng(seed=self.mainSeed)
     return self.state
   
   # Creates seeds and random generator for environment
@@ -162,8 +167,8 @@ class PSE(gym.Env):
     self.mainSeed = mainSeed                                                # Main seed
     self.mainRng = np.random.default_rng(seed=mainSeed)                     # Main random generator to generate other seeds
     
-    self.seed = self.mainRng.integers(100000)
-    self.rng = np.random.default_rng(seed=self.seed)
+    # self.seed = self.mainRng.integers(100000)
+    # self.rng = np.random.default_rng(seed=self.seed)
 
   
   def bar_vertices(self, bar_pos):

@@ -67,7 +67,8 @@ class TwoAgentPolicy(BasePolicy):
         out = Batch(act=Batch(puck=puck_out.act, bar=bar_out.act), state=np.column_stack((puck_out.state, bar_out.state)) if puck_out.state is not None else None, params=Batch())
         out.params = Batch({
             'puck': Batch({key: val for key,val in puck_out.items() if key not in ['act', 'state']}),
-            'bar': Batch({key: val for key,val in bar_out.items() if key not in ['act', 'state']})
+            'bar': Batch
+            ({key: val for key,val in bar_out.items() if key not in ['act', 'state']})
         })
 
         # if self.i <= 2:
