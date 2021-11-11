@@ -7,3 +7,6 @@ sample_runs/
 .DS_Store
 
 wandb/
+
+opt_policy/
+.vscode/

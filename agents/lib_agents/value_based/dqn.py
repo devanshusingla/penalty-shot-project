@@ -23,6 +23,7 @@ class DQN:
             obs.to(self.device)
             batch = obs.shape[0]
             logits = self.model(obs.view(batch, -1))
+            # print(logits, state)
             return logits, state
 
     def __init__(self, state_shape, action_shape, device, lr, **kwargs):
@@ -32,3 +33,6 @@ class DQN:
 
     def __call__(self, **kwargs):
         return DQNPolicy(model=self.net, optim=self.optim, **kwargs)
+
+    def __name__(self):
+        return 'DQN'

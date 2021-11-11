@@ -6,15 +6,16 @@ import numpy as np
 
 # https://github.com/thu-ml/tianshou/issues/192 to enable rendering wrapper
 class RenderEnvWrapper(gym.Wrapper):
-    def __init__(self, env, render_eps):
+    def __init__(self, env, eps: float = 0.02):
         super().__init__(env)
         self.do_render = False
+        self.eps = eps
 
     def step(self, action):
         obs, rew, done, info = self.env.step(action)
         if done:
             eps = np.random.rand()
-            if eps < 0.02:
+            if eps < self.eps:
                 self.do_render = True
             else:
                 self.do_render = False
@@ -91,3 +92,17 @@ def make_render_rew_env():
             gym.wrappers.FlattenObservation(gym.make("gym_env:penalty-shot-v0"))
         )
     )
+
+def general_make_env(params):
+    env = None
+    if 'env' in params:
+        env = gym.make('gym_env:penalty-shot-v0', **params['env'])
+    else:
+        env = gym.make('gym_env:penalty-shot-v0')
+    if 'render' in params:
+        env = RenderEnvWrapper(env, **params['render'])
+    if 'flatten' in params:
+        env = gym.wrappers.FlattenObservation(env)
+    if 'discrete' in params:
+        env = DiscreteActionWrapper(env, **params['discrete'])
+    return env

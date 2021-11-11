@@ -173,6 +173,8 @@ class PSE(gym.Env):
     # Resets the environment's random generators to enable reproducability.
     def reset(self, fullReset=False):
         self.state = self.startState
+        self.theta = 0
+        self.v_ind = 0
         self.step_count = 0
         done = False
 
