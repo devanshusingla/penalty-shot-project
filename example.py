@@ -2,10 +2,11 @@ import torch, numpy as np
 from torch import nn
 from datetime import datetime
 import tianshou as ts
+from tianshou.policy.modelfree.ppo import PPOPolicy
 from tianshou.utils import TensorboardLogger, WandbLogger
 from agents import TwoAgentPolicy
 from agents.lib_agents import SinePolicy, GreedyPolicy
-from agents.lib_agents import DQN
+from agents.lib_agents import DQN, PPO
 from functools import partial
 from utils import general_make_env
 
@@ -36,14 +37,22 @@ env = general_make_env(params=train_params)
 # creating policies
 p1 = SinePolicy()
 # p2 = GreedyPolicy(agent='bar', disc_k=7)
-p2 = DQN(
-    env.observation_space.shape, 
-    env.action_space['bar'].shape
+# p2 = DQN(
+#     env.observation_space.shape, 
+#     env.action_space['bar'].shape
+#     )(
+#         discount_factor=0.99, 
+#         estimation_step=5, 
+#         target_update_freq=320
+#     )
+# p2.set_eps(0.1)
+p2 = PPO(
+    env.observation_space.shape,
+    env.action_space['bar'].shape,
     )(
-        discount_factor=0.99, 
-        estimation_step=5, 
-        target_update_freq=320
+        discount_factor=0.99,
     )
+
 policy = TwoAgentPolicy(observation_space=env.observation_space, action_space=env.action_space, policies=(p1, p2))
 
 
