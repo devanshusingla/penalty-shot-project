@@ -23,7 +23,7 @@ class DQN:
             obs.to(self.device)
             batch = obs.shape[0]
             logits = self.model(obs.view(batch, -1))
-            # print(logits, state)
+            # print("DQN Forward:", logits.shape)
             return logits, state
 
     def __init__(self, state_shape, action_shape, device, lr, **kwargs):
