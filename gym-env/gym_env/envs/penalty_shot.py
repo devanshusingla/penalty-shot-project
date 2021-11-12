@@ -84,7 +84,7 @@ class PSE(gym.Env):
         Done: If the episode is over
         Info: Dictionary of indicator variable and theta parameter
     """
-    reward = np.zeros(shape=action.shape)
+    reward = 0
     done = False
     info = None
     puck_pos, bar_pos, theta, v_ind = self.state
@@ -133,23 +133,16 @@ class PSE(gym.Env):
     # Termination Condition
     if self.goal_nrm - (puck_x + self.puck_diameter/2) < 0.001:
       # Puck hits goal
-      # reward = -1 # Negative reward for bar and positive for puck
+      reward = -1 # Negative reward for bar and positive for puck
       done = True
-      delta = (abs(bar_x - puck_x) + abs(bar_y - puck_y))
-      reward = (2*np.exp(-3*(delta)**2) - 1)
-      # reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
-      reward = np.reshape(reward, action.shape)
+
     elif (
       abs(bar_x - puck_x) < (self.puck_diameter + self.bar_width)/2 
       and abs(bar_y - puck_y) < (self.puck_diameter + self.bar_length)/2
       ):
       # Bar stopped puck
-      # reward = 1 # Positive reward for bar and Negative for puck
+      reward = 1 # Positive reward for bar and Negative for puck
       done = True
-      delta = (abs(bar_x - puck_x) + abs(bar_y - puck_y))
-      reward = 2*np.exp(-3*(delta)**2) - 1
-      # reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
-      reward = np.reshape(reward, action.shape)
 
     self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind+3)
     self.step_count += 1
@@ -177,7 +170,6 @@ class PSE(gym.Env):
     # self.seed = self.mainRng.integers(100000)
     # self.rng = np.random.default_rng(seed=self.seed)
 
-  
   def bar_vertices(self, bar_pos):
     bar_x, bar_y = bar_pos
     l, r = (bar_x - self.bar_width/2, bar_x + self.bar_width/2) # Left, right x coordinates
