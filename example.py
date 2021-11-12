@@ -74,12 +74,12 @@ test_collector = ts.data.Collector(
 
 # logging
 # First sign in on wandb
-# logger = WandbLogger(
-#     save_interval=1,
-#     project="test-project",
-#     name='Sarthak Rout',
-#     entity='penalty-shot-project',
-# )
+logger = WandbLogger(
+    save_interval=1,
+    project="test-project",
+    name='Sarthak Rout',
+    entity='penalty-shot-project',
+)
 # training
 
 result = ts.trainer.onpolicy_trainer(
@@ -91,10 +91,8 @@ result = ts.trainer.onpolicy_trainer(
     batch_size=64,
     # update_per_step=0.1, 
     episode_per_collect=10,    
-    
-    #  logger=logger
+     logger=logger
      )
-np.stack()
 print(f'Finished training! Use {result}')
 
 torch.save(policy.state_dict(), './opt_policy/policy_{:%Y-%m-%d_%H-%M-%S}.pth'.format(datetime.now()))

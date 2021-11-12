@@ -2,12 +2,9 @@ from tianshou.policy.modelfree.a2c import A2CPolicy
 from torch import optim
 from tianshou.policy import PPOPolicy
 import torch, numpy as np
-from torch import nn
-from tianshou.policy.base import BasePolicy
 from tianshou.utils.net.common import ActorCritic, Net
-from tianshou.utils.net.continuous import Actor, ActorProb, Critic
+from tianshou.utils.net.continuous import ActorProb, Critic
 from torch.distributions import Independent, Normal
-from tianshou.data import Batch
 
 def dist(*logits):
     return Independent(Normal(*logits), 1)
@@ -22,9 +19,9 @@ class PPO:
 
     def __call__(self, **kwargs):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        actor_net = Net(self.state_shape, hidden_sizes=[128, 128], device=device, concat=True)
+        actor_net = Net(self.state_shape, hidden_sizes=[128, 128], device=device)
         actor = ActorProb(actor_net, self.action_shape, max_action=self.max_action, device=device).to(device)
-        critic = Critic(Net(self.state_shape, 1, hidden_sizes=[128, 128], device=device, concat=True), device=device).to(device)
+        critic = Critic(Net(self.state_shape, 1, hidden_sizes=[128, 128], device=device), device=device).to(device)
         actor_critic = ActorCritic(actor, critic)
         for m in actor_critic.modules():
             if isinstance(m, torch.nn.Linear):
