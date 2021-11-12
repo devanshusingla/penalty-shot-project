@@ -6,7 +6,7 @@ from tianshou.utils import TensorboardLogger, WandbLogger
 from agents import TwoAgentPolicy
 from agents.lib_agents import SinePolicy, GreedyPolicy
 from agents.lib_agents import DQN
-from utils import general_make_env
+from utils.envs import general_make_env
 from functools import partial
 
 # Hyper parameters for the example
