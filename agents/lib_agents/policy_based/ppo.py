@@ -1,3 +1,4 @@
+from tianshou.policy.base import BasePolicy
 from tianshou.policy.modelfree.a2c import A2CPolicy
 from torch import optim
 from tianshou.policy import PPOPolicy
@@ -9,7 +10,7 @@ from torch.distributions import Independent, Normal
 def dist(*logits):
     return Independent(Normal(*logits), 1)
 
-class PPO:
+class PPO(BasePolicy):
 
     def __init__(self, state_shape, action_space, hidden_sizes = [128, 128], **kwargs):
         self.state_shape = state_shape
