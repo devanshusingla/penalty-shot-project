@@ -41,20 +41,6 @@ class DiscreteActionWrapper(gym.ActionWrapper):
         act["bar"] = -1.0 + 2 * act["bar"] / (self.k - 1)
         return act
 
-
-class RewardWrapper(gym.Wrapper):
-    def __init__(self, env, lamda=0.5, dist=0.4):
-        super().__init__(env)
-        self.lamda = lamda
-        self.dist = dist
-
-    def step(self, action):
-        obs, rew, done, info = self.env.step(action)
-        if done and rew < 0:
-            rew += self.lamda * max(0.0, self.dist - np.abs(obs[3] - obs[1]))
-        return obs, rew, done, info
-
-
 def make_env():
     return gym.wrappers.FlattenObservation(gym.make("gym_env:penalty-shot-v0"))
 
@@ -92,13 +78,49 @@ def make_render_rew_env():
             gym.wrappers.FlattenObservation(gym.make("gym_env:penalty-shot-v0"))
         )
     )
+    
+def IncNegReward(obs, rew, done, info, func_params: dict = {}):
+    lamda = func_params.get('lamda', 0.5)
+    dist = func_params.get('dist', 0.4)
+    if done and rew < 0:
+        rew += lamda * max(0.0, dist - np.abs(obs[1][1] - obs[0][1]))
+    return obs, rew, done, info
 
-def general_make_env(params):
+def AbsDifReward(obs, rew, done, info, func_params: dict = {}):
+    if done:
+        delta = np.sum(np.abs(np.array(obs[1], dtype=np.float32) - np.array(obs[0], dtype=np.float32)))
+        rew = 1 - delta
+    return obs, rew, done, info
+
+def FourApprReward(obs, rew, done, info, func_params: dict = {}):
+    # exponent = func_params.get('exponent', 4.0)
+    if done:
+        delta = np.sum(np.abs(np.array(obs[1], dtype=np.float32) - np.array(obs[0], dtype=np.float32)))
+        rew = 2/(1 + (6*delta)**4) - 1
+    return obs, rew, done, info    
+
+def IdReward(obs, rew, done, info, func_params: dict = {}):
+    return obs, rew, done, info
+
+class RewardWrapper(gym.Wrapper):
+    def __init__(self, env, reward_transform = IdReward, func_params: dict = {}):
+        super().__init__(env)
+        self.reward_func = reward_transform
+        self.func_params = func_params
+
+    def step(self, action):
+        obs, rew, done, info = self.env.step(action)
+        obs, rew, done, info = self.reward_func(obs, rew, done, info, self.func_params)
+        return obs, np.reshape(rew, newshape=action.shape), done, info
+
+def general_make_env(params={}):
     env = None
     if 'env' in params:
         env = gym.make('gym_env:penalty-shot-v0', **params['env'])
     else:
         env = gym.make('gym_env:penalty-shot-v0')
+    if 'reward' in params:
+        env = RewardWrapper(env, **params['reward'])
     if 'render' in params:
         env = RenderEnvWrapper(env, **params['render'])
     if 'flatten' in params:
