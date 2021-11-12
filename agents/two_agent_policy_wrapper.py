@@ -91,7 +91,6 @@ class TwoAgentPolicy(BasePolicy):
         if hasattr(self.bar_policy, "set_eps"):
             self.bar_policy.set_eps(eps)
 
-
     """
         These three functions are called in update function of BasePolicy in the order process_fn -> learn -> post_process_fn one after another.
     """

@@ -5,12 +5,18 @@ import numpy as np
 
 class SinePolicy(BasePolicy):
     def __init__(
-        self, max_cycles: int = 5, seed: int = 0, max_steps: int = 90, **kwargs
+        self,
+        max_cycles: int = 2,
+        min_magnitude=0.8,
+        seed: int = 0,
+        max_steps: int = 90,
+        **kwargs
     ):
         super().__init__(**kwargs)
         self.rng = np.random.default_rng(seed)
         self.max_steps = max_steps
         self.max_cycles = max_cycles
+        self.min_magnitude = min_magnitude
         self.param = {}
 
     def _get_action(self, info_batch: Batch, done_batch: Batch):
@@ -18,11 +24,11 @@ class SinePolicy(BasePolicy):
         for i, (info, done) in enumerate(zip(info_batch, done_batch)):
             if info.env_id not in self.param or done:
                 self.param[info.env_id] = (
-                    self.rng.random(),
-                    self.rng.integers(self.max_cycles) + 1,
+                    self.min_magnitude + self.rng.random() * (1 - self.min_magnitude),
+                    (2 * self.rng.random() - 1) * self.max_cycles,
                 )
             act[i] = self.param[info.env_id][0] * np.sin(
-                5 * self.param[info.env_id][1] * info.steps / self.max_steps
+                np.pi * self.param[info.env_id][1] * info.steps / self.max_steps
             )
 
         return act
