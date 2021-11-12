@@ -85,6 +85,7 @@ class PSE(gym.Env):
         Done: If the episode is over
         Info: Dictionary of indicator variable and theta parameter
     """
+    # print(action)
     reward = 0
     done = False
     info = None
@@ -159,6 +160,8 @@ class PSE(gym.Env):
   # Resets the environment's random generators to enable reproducability.
   def reset(self, fullReset=False):
     self.state = self.startState
+    self.v_ind = 0
+    self.theta = 0
     self.step_count = 0
     done = False
 

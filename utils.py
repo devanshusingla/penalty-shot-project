@@ -37,6 +37,8 @@ class DiscreteActionWrapper(gym.ActionWrapper):
         act['bar'] = -1.0 + 2*act['bar']/(self.k-1)
         return act
 
+
+
 def general_make_env(params):
     env = None
     if 'env' in params:

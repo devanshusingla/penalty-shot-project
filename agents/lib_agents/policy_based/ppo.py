@@ -1,24 +1,44 @@
+from tianshou.policy.modelfree.a2c import A2CPolicy
 from torch import optim
 from tianshou.policy import PPOPolicy
 import torch, numpy as np
 from torch import nn
 from tianshou.policy.base import BasePolicy
-from tianshou.utils.net.common import Net
+from tianshou.utils.net.common import ActorCritic, Net
+from tianshou.utils.net.continuous import Actor, ActorProb, Critic
+from torch.distributions import Independent, Normal
+from tianshou.data import Batch
+
+def dist(*logits):
+    # print("Logits: ", logits)
+    return Independent(Normal(*logits), 1)
 
 class PPO:
-    def __init__(self, state_shape, action_shape, **kwargs):
-        super().__init__()
-        self.actor = Net(state_shape, action_shape, hidden_sizes=[128, 128])
-        self.critic = Net(state_shape, [1], hidden_sizes=[128, 128])
-        self.optim = torch.optim.Adam(list(self.actor.parameters()) + list(self.critic.parameters()), lr=1e-3)
 
+    def __init__(self, state_shape, action_space, **kwargs):
+        self.state_shape = state_shape
+        self.action_space = action_space
+        self.action_shape = action_space.shape
+        self.max_action = action_space.high[0]
+        print(self.state_shape, self.action_shape, self.max_action, action_space)
 
     def __call__(self, **kwargs):
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        actor_net = Net(self.state_shape, hidden_sizes=[128, 128], device=device, concat=True)
+        actor = ActorProb(actor_net, self.action_shape, max_action=self.max_action, device=device).to(device)
+        critic = Critic(Net(self.state_shape, 1, hidden_sizes=[128, 128], device=device, concat=True), device=device).to(device)
+        actor_critic = ActorCritic(actor, critic)
+        for m in actor_critic.modules():
+            if isinstance(m, torch.nn.Linear):
+                torch.nn.init.orthogonal_(m.weight)
+                torch.nn.init.zeros_(m.bias)
+        optim = torch.optim.Adam(actor_critic.parameters(), lr=1e-3)
         return PPOPolicy(
-            actor=self.actor,
-            critic=self.critic,
-            dist_fn=torch.distributions.OneHotCategorical,
-            optim=self.optim,
+            actor=actor,
+            critic=critic,
+            optim=optim,
+            dist_fn=dist,
+            action_space=self.action_space,
             **kwargs)
     
     def __name__(self):

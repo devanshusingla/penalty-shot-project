@@ -1,3 +1,4 @@
+
 import torch, numpy as np
 from torch import nn
 from datetime import datetime
@@ -10,6 +11,8 @@ from agents.lib_agents import DQN, PPO
 from functools import partial
 from utils import general_make_env
 
+
+
 # Hyper parameters for the example
 NUM_TRAIN_ENVS = 3
 NUM_TEST_ENVS = 5
@@ -20,18 +23,18 @@ BUFFER_NUM = 10
 # Parameters for environment
 train_params = {
     'flatten' : {},
-    'discrete': {
-        'k': BAR_ACTION_K,
-    }
+    # 'discrete': {
+    #     'k': BAR_ACTION_K,
+    # }
 }
 test_params = {
     'flatten' : {},
     'render': {
         'eps': 0.02
     },
-    'discrete': {
-        'k': BAR_ACTION_K,
-    }
+    # 'discrete': {
+    #     'k': BAR_ACTION_K,
+    # }
 }
 env = general_make_env(params=train_params)
 # creating policies
@@ -45,10 +48,12 @@ p1 = SinePolicy()
 #         estimation_step=5, 
 #         target_update_freq=320
 #     )
-# p2.set_eps(0.1)
+# print(env.action_space)
+# print(env.observation_space)
+# print(env.action_space.sample())
 p2 = PPO(
     env.observation_space.shape,
-    env.action_space['bar'].shape,
+    env.action_space['bar']
     )(
         discount_factor=0.99,
     )
@@ -69,6 +74,7 @@ test_collector = ts.data.Collector(
     policy, 
     test_envs, exploration_noise=True)
 
+
 # logging
 # First sign in on wandb
 # logger = WandbLogger(
@@ -79,12 +85,19 @@ test_collector = ts.data.Collector(
 # )
 # training
 
-result = ts.trainer.offpolicy_trainer(
+result = ts.trainer.onpolicy_trainer(
     policy, train_collector, test_collector,
-    max_epoch=10, step_per_epoch=10000, step_per_collect=10,
-    update_per_step=0.1, episode_per_test=100, batch_size=64,
+    max_epoch=10, 
+    step_per_epoch=10000, 
+    repeat_per_collect=2,
+    episode_per_test=100, 
+    batch_size=64,
+    # update_per_step=0.1, 
+    episode_per_collect=10,    
+    
     #  logger=logger
      )
+np.stack()
 print(f'Finished training! Use {result}')
 
 torch.save(policy.state_dict(), './opt_policy/policy_{:%Y-%m-%d_%H-%M-%S}.pth'.format(datetime.now()))
