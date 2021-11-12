@@ -10,7 +10,6 @@ from torch.distributions import Independent, Normal
 from tianshou.data import Batch
 
 def dist(*logits):
-    # print("Logits: ", logits)
     return Independent(Normal(*logits), 1)
 
 class PPO:
@@ -20,7 +19,6 @@ class PPO:
         self.action_space = action_space
         self.action_shape = action_space.shape
         self.max_action = action_space.high[0]
-        print(self.state_shape, self.action_shape, self.max_action, action_space)
 
     def __call__(self, **kwargs):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'

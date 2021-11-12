@@ -48,9 +48,6 @@ p1 = SinePolicy()
 #         estimation_step=5, 
 #         target_update_freq=320
 #     )
-# print(env.action_space)
-# print(env.observation_space)
-# print(env.action_space.sample())
 p2 = PPO(
     env.observation_space.shape,
     env.action_space['bar']

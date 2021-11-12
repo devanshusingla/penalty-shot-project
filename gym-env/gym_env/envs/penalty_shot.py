@@ -85,12 +85,9 @@ class PSE(gym.Env):
         Done: If the episode is over
         Info: Dictionary of indicator variable and theta parameter
     """
-    # print(action)
-    reward = 0
+    reward = np.zeros(shape=action.shape)
     done = False
     info = None
-    if self.step_count < 2:
-      print(self.state, action)
     puck_pos, bar_pos, theta, v_ind = self.state
 
     ##Clamp puck and bar actions between [-1, 1]
@@ -142,6 +139,7 @@ class PSE(gym.Env):
       delta = (abs(bar_x - puck_x) + abs(bar_y - puck_y))
       # reward = (2*np.exp(-3*(delta)**2) - 1)
       reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
+      reward = np.reshape(reward, action.shape)
     elif (
       abs(bar_x - puck_x) < (self.puck_diameter + self.bar_width)/2 
       and abs(bar_y - puck_y) < (self.puck_diameter + self.bar_length)/2
@@ -152,6 +150,7 @@ class PSE(gym.Env):
       delta = (abs(bar_x - puck_x) + abs(bar_y - puck_y))
       # reward = 2*np.exp(-3*(delta)**2) - 1
       reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
+      reward = np.reshape(reward, action.shape)
 
     self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind+3)
     self.step_count += 1
