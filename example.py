@@ -7,6 +7,7 @@ from tianshou.utils import TensorboardLogger, WandbLogger
 from agents import TwoAgentPolicy
 from agents.lib_agents import SinePolicy, GreedyPolicy
 from agents.lib_agents import DQN, PPO
+
 from functools import partial
 from utils import AbsDifReward, FourApprReward, IdReward, general_make_env
 
@@ -22,7 +23,7 @@ BUFFER_NUM = 10
 train_params = {
     'flatten' : {},
     'reward' : {
-        'reward_transform' : AbsDifReward,
+        'reward_transform' : FourApprReward,
         'func_params' : {}
     }
     # # use discrete for DQN

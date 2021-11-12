@@ -54,7 +54,7 @@ def FourApprReward(obs, rew, done, info, func_params: dict = {}):
     # exponent = func_params.get('exponent', 4.0)
     if done:
         delta = np.sum(np.abs(np.array(obs[1], dtype=np.float32) - np.array(obs[0], dtype=np.float32)))
-        rew = 2/(1 + (6*delta)**4) - 1
+        rew = (2/(1 + (3*delta)**4)) - 1
     return obs, rew, done, info    
 
 def IdReward(obs, rew, done, info, func_params: dict = {}):
