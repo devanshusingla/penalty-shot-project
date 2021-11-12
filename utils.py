@@ -9,12 +9,13 @@ class RenderEnvWrapper(gym.Wrapper):
     def __init__(self, env, render_eps):
         super().__init__(env)
         self.do_render = False
+        self.render_eps = render_eps
 
     def step(self, action):
         obs, rew, done, info = self.env.step(action)
         if done:
             eps = np.random.rand()
-            if eps < 0.02:
+            if eps < self.render_eps:
                 self.do_render = True
             else:
                 self.do_render = False

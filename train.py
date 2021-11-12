@@ -125,6 +125,8 @@ def main(args):
                 (args.eps_train_final / args.eps_train) ** (env_step / tot_steps)
             )
         policy.set_eps(eps)
+        if env_step % 1000 == 0:
+            logger.write("train/env_step", env_step, {"train/eps": eps})
 
     def test_fn(epoch, env_step):
         policy.set_eps(args.eps_test)

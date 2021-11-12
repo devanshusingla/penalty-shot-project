@@ -91,7 +91,6 @@ class TwoAgentPolicy(BasePolicy):
         if hasattr(self.bar_policy, "set_eps"):
             self.bar_policy.set_eps(eps)
 
-
     """
         These three functions are called in update function of BasePolicy in the order process_fn -> learn -> post_process_fn one after another.
     """
@@ -118,8 +117,12 @@ class TwoAgentPolicy(BasePolicy):
         (puck_batch, bar_batch) = batch
         puck_out = self.puck_policy.learn(puck_batch, **kwargs)
         bar_out = self.bar_policy.learn(bar_batch, **kwargs)
-
-        return bar_out
+        result = {}
+        for k, v in puck_out.items():
+            result[f"puck/{k}"] = v
+        for k, v in puck_out.items():
+            result[f"bar/{k}"] = v
+        return result
 
     def post_process_fn(
         self, batch: Batch, buffer: ReplayBuffer, indices: np.ndarray
