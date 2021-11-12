@@ -7,17 +7,18 @@ from matplotlib import animation
 import matplotlib.pyplot as plt
 import os
 
-with open_text('communication','config.json') as f:
+with open_text("communication", "config.json") as f:
     config = json.load(f)
-    host = config['host']
-    port = config['port']
-    msg_length = config['msg length']
-    initial_time_lapse = config['initial time lapse']
-    frame_time_lapse = config['frame time lapse']
-    final_time_lapse = config['final time lapse']
+    host = config["host"]
+    port = config["port"]
+    msg_length = config["msg length"]
+    initial_time_lapse = config["initial time lapse"]
+    frame_time_lapse = config["frame time lapse"]
+    final_time_lapse = config["final time lapse"]
+
 
 class PSServer:
-    def __init__(self, env, port=port, save_run = False, save_path = "./"):
+    def __init__(self, env, port=port, save_run=False, save_path="./"):
         self.env = env
         self.port = port
         self.bar = None
@@ -26,7 +27,7 @@ class PSServer:
         self.save_path = save_path
 
         self.agents_ready = Event()
-    
+
     def start(self):
         start_new_thread(self.run_server, ())
 
@@ -34,12 +35,12 @@ class PSServer:
             self.agents_ready.wait()
             self.play()
             self.agents_ready.clear()
-    
+
     def run_server(self):
         server_sock = socket.socket()
         print("server socket created successfully")
 
-        server_sock.bind(('', self.port))
+        server_sock.bind(("", self.port))
         print("socket binded to port {}".format(server_sock.getsockname()[1]))
 
         server_sock.listen(2)
@@ -49,15 +50,19 @@ class PSServer:
             sock, addr = server_sock.accept()
             print("got connection from {}".format(addr))
 
-            start_new_thread(self.add_agent, (sock, ))
-    
+            start_new_thread(self.add_agent, (sock,))
+
     def add_agent(self, agent):
         agent_id = agent.recv(msg_length)
         if not agent_id:
             print("{} closed connection".format(agent.getsockname()[1]))
 
-        print("{} requested to play as {}".format(agent.getsockname()[1], agent_id.decode()))
-        if agent_id.decode() == 'P':
+        print(
+            "{} requested to play as {}".format(
+                agent.getsockname()[1], agent_id.decode()
+            )
+        )
+        if agent_id.decode() == "P":
             if self.puck is not None:
                 print("puck is already assigned closing connection")
                 agent.close()
@@ -66,7 +71,7 @@ class PSServer:
                 agent.send(str.encode("connected"))
                 print("{} playing as puck".format(agent.getsockname()[1]))
 
-        elif agent_id.decode() == 'B':
+        elif agent_id.decode() == "B":
             if self.bar is not None:
                 print("bar is already assigned closing connection")
                 agent.close()
@@ -74,7 +79,7 @@ class PSServer:
                 self.bar = agent
                 agent.send(str.encode("connected"))
                 print("{} playing as bar".format(agent.getsockname()[1]))
-        
+
         if self.puck is not None and self.bar is not None:
             self.agents_ready.set()
 
@@ -82,7 +87,7 @@ class PSServer:
         msg_puck = self.puck.recv(msg_length)
         msg_bar = self.bar.recv(msg_length)
 
-        if msg_puck.decode() != 'start' or msg_bar.decode() != 'start':
+        if msg_puck.decode() != "start" or msg_bar.decode() != "start":
             print("agents not starting game")
             return
 
@@ -92,7 +97,7 @@ class PSServer:
 
         self.puck.send(pickle.dumps((state, done)))
         self.bar.send(pickle.dumps((state, done)))
-        
+
         time.sleep(initial_time_lapse)
 
         frames = []
@@ -115,9 +120,9 @@ class PSServer:
             self.puck.send(pickle.dumps(res))
             self.bar.send(pickle.dumps(res))
 
-            if(self.save_run):
+            if self.save_run:
                 frames.append(self.env.render(mode="rgb_array"))
-            else :
+            else:
                 self.env.render()
 
             time.sleep(frame_time_lapse)
@@ -133,27 +138,31 @@ class PSServer:
         self.bar.close()
         self.puck = None
         self.bar = None
-        if(self.save_run):
+        if self.save_run:
             print("Saving run ...")
             self.save_render(frames)
-    
-    def save_render(self, frames):
-        plt.figure(figsize=(frames[0].shape[1] / 150.0, frames[0].shape[0] / 150.0), dpi=150)
 
-        plt.axis('off')
+    def save_render(self, frames):
+        plt.figure(
+            figsize=(frames[0].shape[1] / 150.0, frames[0].shape[0] / 150.0), dpi=150
+        )
+
+        plt.axis("off")
         patch = plt.imshow(frames[0])
 
         def animate(i):
             patch.set_data(frames[i])
 
-        anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(frames), interval=60)
+        anim = animation.FuncAnimation(
+            plt.gcf(), animate, frames=len(frames), interval=60
+        )
         writergif = animation.PillowWriter(fps=60)
 
-        #check if folder exists 
+        # check if folder exists
         index = self.save_path.rfind("/")
-        folder_name = self.save_path[:index+1]
-        if(not os.path.isdir(folder_name)):
+        folder_name = self.save_path[: index + 1]
+        if not os.path.isdir(folder_name):
             print("Made folder {}".format(folder_name))
             os.mkdir(folder_name)
 
-        anim.save(self.save_path, writer = writergif)
+        anim.save(self.save_path, writer=writergif)
