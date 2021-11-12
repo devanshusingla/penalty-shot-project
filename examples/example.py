@@ -8,7 +8,7 @@ from agents import TwoAgentPolicy
 from agents.lib_agents import SinePolicy, GreedyPolicy
 from agents.lib_agents import DQN, PPO
 from functools import partial
-from utils import AbsDifReward, FourApprReward, IdReward, general_make_env
+from utils.envs import AbsDifReward, FourApprReward, IdReward, general_make_env
 
 
 # Hyper parameters for the example

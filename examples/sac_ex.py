@@ -11,7 +11,7 @@ from agents import TwoAgentPolicy
 from agents.lib_agents import SinePolicy
 from agents.lib_agents import SAC
 
-from utils import general_make_env
+from utils.envs import general_make_env
 
 train_params = {
     'flatten': {}
