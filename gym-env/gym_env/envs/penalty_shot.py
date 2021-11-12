@@ -30,8 +30,7 @@ class PSE(gym.Env):
         maxEpisodes (int, optional): Maximum number of episodes. Defaults to 90.
         puck_start (tuple, optional): Normalised start (x, y) coordinates for the puck. Defaults to (-0.75, 0).
         bar_start (tuple, optional): Normalised start (x, y) coordinates for the bar. Defaults to (0.75, 0).
-        screen_size (tuple, optional): A
-        ctual screen size (height, width). Defaults to (480, 640).
+        screen_size (tuple, optional): Actual screen size (height, width). Defaults to (480, 640).
         goal_nrm (float, optional): Normalised x-coordinate defining the goal line. Defaults to 0.77.
         bar_size (tuple, optional): Normalised values for size of the bar (length, width). Defaults to (1/6, 1/128).
         puck_diameter (float, optional): Normalised diameter of the puck. Defaults to 1/64.
@@ -134,21 +133,16 @@ class PSE(gym.Env):
     # Termination Condition
     if self.goal_nrm - (puck_x + self.puck_diameter/2) < 0.001:
       # Puck hits goal
-      # reward = -1 # Negative reward for bar and positive for puck
+      reward = -1 # Negative reward for bar and positive for puck
       done = True
-      delta = (abs(bar_x - puck_x) + abs(bar_y - puck_y))
-      reward = 2*np.exp(-3*(delta)**2) - 1
-      # reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
+
     elif (
       abs(bar_x - puck_x) < (self.puck_diameter + self.bar_width)/2 
       and abs(bar_y - puck_y) < (self.puck_diameter + self.bar_length)/2
       ):
       # Bar stopped puck
-      # reward = 1 # Positive reward for bar and Negative for puck
+      reward = 1 # Positive reward for bar and Negative for puck
       done = True
-      delta = (abs(bar_x - puck_x) + abs(bar_y - puck_y))
-      reward = 2*np.exp(-3*(delta)**2) - 1
-      # reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
 
     self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind+3)
     self.step_count += 1
@@ -159,6 +153,8 @@ class PSE(gym.Env):
   # Resets the environment's random generators to enable reproducability.
   def reset(self, fullReset=False):
     self.state = self.startState
+    self.v_ind = 0
+    self.theta = 0
     self.step_count = 0
     done = False
 
@@ -174,7 +170,6 @@ class PSE(gym.Env):
     # self.seed = self.mainRng.integers(100000)
     # self.rng = np.random.default_rng(seed=self.seed)
 
-  
   def bar_vertices(self, bar_pos):
     bar_x, bar_y = bar_pos
     l, r = (bar_x - self.bar_width/2, bar_x + self.bar_width/2) # Left, right x coordinates
