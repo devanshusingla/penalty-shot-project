@@ -41,6 +41,19 @@ class DiscreteActionWrapper(gym.ActionWrapper):
         return act
 
 
+class RewardWrapper(gym.Wrapper):
+    def __init__(self, env, lamda=0.5, dist=0.4):
+        super().__init__(env)
+        self.lamda = lamda
+        self.dist = dist
+
+    def step(self, action):
+        obs, rew, done, info = self.env.step(action)
+        if done and rew < 0:
+            rew += self.lamda * max(0.0, self.dist - np.abs(obs[3] - obs[1]))
+        return obs, rew, done, info
+
+
 def make_env():
     return gym.wrappers.FlattenObservation(gym.make("gym_env:penalty-shot-v0"))
 
@@ -63,4 +76,18 @@ def make_render_discrete_env(render_eps, k: int = 7):
 def make_render_env(render_eps):
     return gym.wrappers.FlattenObservation(
         RenderEnvWrapper(gym.make("gym_env:penalty-shot-v0"), render_eps)
+    )
+
+
+def make_rew_env():
+    return RewardWrapper(
+        gym.wrappers.FlattenObservation(gym.make("gym_env:penalty-shot-v0"))
+    )
+
+
+def make_render_rew_env():
+    return RenderEnvWrapper(
+        RewardWrapper(
+            gym.wrappers.FlattenObservation(gym.make("gym_env:penalty-shot-v0"))
+        )
     )
