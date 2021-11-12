@@ -3,4 +3,4 @@ from .trivial import SinePolicy
 
 from .value_based import DQN
 
-from .policy_based import SAC
+from .policy_based import SAC, DDPG
