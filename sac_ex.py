@@ -1,26 +1,39 @@
+from functools import partial
 import torch, numpy as np
 from torch import nn
 
 import tianshou as ts
 from tianshou.utils import TensorboardLogger, WandbLogger
+from torch.cuda import is_available
 from torch.utils.tensorboard import SummaryWriter, writer
 
 from agents import TwoAgentPolicy
 from agents.lib_agents import SinePolicy
 from agents.lib_agents import SAC
-from functools import partial
 
-from utils import make_render_env, make_env, make_discrete_env, make_render_discrete_env
+from utils import general_make_env
 
-env = make_env()
-train_envs = ts.env.DummyVectorEnv([make_env for _ in range(10)])
-test_envs = ts.env.DummyVectorEnv([partial(make_render_env, 0.02) for _ in range(5)])
+train_params = {
+    'flatten': {}
+}
+test_params = {
+    'flatten': {},
+    'render': {
+        'eps': 0.02
+    }
+}
+env = general_make_env(train_params)
+train_envs = ts.env.DummyVectorEnv([partial(general_make_env, params=train_params) for _ in range(10)])
+test_envs = ts.env.DummyVectorEnv([partial(general_make_env, test_params) for _ in range(5)])
 
 # creating policies
 
 p1 = SinePolicy()
 p2 = SAC(
-    env.action_space["bar"], env.observation_space.shape, env.action_space["bar"].shape
+    env.action_space["bar"], 
+    env.observation_space.shape, 
+    env.action_space["bar"].shape,
+    device='cuda' if torch.cuda.is_available() else 'cpu'
 )(n_step=1)
 policy = TwoAgentPolicy(
     observation_space=env.observation_space,
@@ -33,7 +46,7 @@ policy = TwoAgentPolicy(
 train_collector = ts.data.Collector(
     policy,
     train_envs,
-    ts.data.VectorReplayBuffer(2000, len(train_envs)),
+    ts.data.VectorReplayBuffer(20, len(train_envs)),
     exploration_noise=True,
 )
 test_collector = ts.data.Collector(policy, test_envs, exploration_noise=True)
@@ -48,13 +61,12 @@ test_collector = ts.data.Collector(policy, test_envs, exploration_noise=True)
 # )
 
 # training
-
 result = ts.trainer.offpolicy_trainer(
     policy,
     train_collector,
     test_collector,
-    max_epoch=10,
-    step_per_epoch=10000,
+    max_epoch=1,
+    step_per_epoch=100,
     step_per_collect=10,
     update_per_step=0.1,
     episode_per_test=100,

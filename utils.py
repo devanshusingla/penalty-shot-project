@@ -39,7 +39,7 @@ class DiscreteActionWrapper(gym.ActionWrapper):
 
 
 
-def general_make_env(params):
+def general_make_env(params={}):
     env = None
     if 'env' in params:
         env = gym.make('gym_env:penalty-shot-v0', **params['env'])

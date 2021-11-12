@@ -89,6 +89,8 @@ class PSE(gym.Env):
     reward = 0
     done = False
     info = None
+    if self.step_count < 2:
+      print(self.state, action)
     puck_pos, bar_pos, theta, v_ind = self.state
 
     ##Clamp puck and bar actions between [-1, 1]
@@ -138,8 +140,8 @@ class PSE(gym.Env):
       # reward = -1 # Negative reward for bar and positive for puck
       done = True
       delta = (abs(bar_x - puck_x) + abs(bar_y - puck_y))
-      reward = 2*np.exp(-3*(delta)**2) - 1
-      # reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
+      # reward = (2*np.exp(-3*(delta)**2) - 1)
+      reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
     elif (
       abs(bar_x - puck_x) < (self.puck_diameter + self.bar_width)/2 
       and abs(bar_y - puck_y) < (self.puck_diameter + self.bar_length)/2
@@ -148,8 +150,8 @@ class PSE(gym.Env):
       # reward = 1 # Positive reward for bar and Negative for puck
       done = True
       delta = (abs(bar_x - puck_x) + abs(bar_y - puck_y))
-      reward = 2*np.exp(-3*(delta)**2) - 1
-      # reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
+      # reward = 2*np.exp(-3*(delta)**2) - 1
+      reward = 1 - (abs(bar_x - puck_x) + abs(bar_y - puck_y))
 
     self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind+3)
     self.step_count += 1
