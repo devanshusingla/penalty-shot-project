@@ -6,11 +6,13 @@ from tianshou.utils import WandbLogger
 from tianshou.env import SubprocVectorEnv
 from tianshou.data import Collector, VectorReplayBuffer
 from tianshou.trainer import offpolicy_trainer, onpolicy_trainer
+from torch.serialization import save
 from agents import TwoAgentPolicy
 from agents.lib_agents import *
 from .envs import make_envs, MakeEnv
 from .config import puck_params, bar_params, env_params
 import argparse
+import os
 
 algo_mapping = {
     "sine": SinePolicy,
@@ -67,6 +69,9 @@ def get_args():
     parser.add_argument("--wandb-run-id", type=str, default=None)
 
     parser.add_argument("--trainer", type=str, default="off", choices=["off", "on"])
+    parser.add_argument("--save", action='store_true', default=False)
+    parser.add_argument("--load-puck-id", type=str, default=None)
+    parser.add_argument("--load-bar-id", type=str, default=None)
 
     return parser.parse_args()
 
@@ -126,6 +131,24 @@ def train(args):
     else:
         policy_bar = algo_mapping[args.bar](**bar_params[args.bar])
 
+    # Loading policies
+
+    if args.load_puck_id is not None:
+        assert args.wandb_run_id is not None
+        policy_puck.load_state_dict(
+            torch.load(
+                "saved_policies/{}/puck_{}.pth".format(args.load_puck_id, args.puck)
+            )
+        )
+
+    if args.load_bar_id is not None:
+        assert args.wandb_run_id is not None
+        policy_bar.load_state_dict(
+            torch.load(
+                "saved_policies/{}/bar_{}.pth".format(args.load_bar_id, args.bar)
+            )
+        )
+
     policy = TwoAgentPolicy(
         (policy_puck, policy_bar),
         observation_space=env.observation_space,
@@ -176,6 +199,30 @@ def train(args):
     def test_fn(epoch, env_step):
         policy.set_eps(args.eps_test)
 
+    def save_checkpoint_fn(epoch: int, env_step: int, gradient_step: int):
+        save_folder = "saved_policies/{}".format(args.wandb_run_id)
+        if not os.path.isdir(save_folder):
+            os.makedirs(save_folder)
+
+        puck_file_path = "{}/puck_{}.pth".format(save_folder, args.puck)
+        print("saving puck")
+        torch.save(policy.puck_policy.state_dict(), puck_file_path)
+
+        bar_file_path = "{}/bar_{}.pth".format(save_folder, args.bar)
+        print("saving bar")
+        torch.save(policy.bar_policy.state_dict(), bar_file_path)
+
+        save_path = "{}/log".format(save_folder)
+        if not os.path.isfile(save_path):
+            with open(save_path, 'w') as f:
+                pass
+        return save_path
+
+    if not args.save:
+        save_checkpoint_fn = None
+    else:
+        assert(args.wandb_run_id is not None)
+
     if args.trainer == "off":
         result = offpolicy_trainer(
             policy,
@@ -190,6 +237,7 @@ def train(args):
             test_fn=test_fn,
             logger=logger,
             update_per_step=args.update_per_step,
+            save_checkpoint_fn=save_checkpoint_fn,
         )
     elif args.trainer == "on":
         result = ts.trainer.onpolicy_trainer(
@@ -203,6 +251,7 @@ def train(args):
             batch_size=args.batch_size,
             episode_per_collect=args.episode_per_collect,
             logger=logger,
+            save_checkpoint_fn=save_checkpoint_fn,
         )
     else:
         raise Exception("invalid trainer")
