@@ -4,6 +4,11 @@ from torch import nn
 
 
 class DQN:
+    def __init__(self, state_shape, action_shape, device, lr, **kwargs):
+        self.device = device
+        self.net = self.Net(state_shape, action_shape).to(self.device)
+        self.optim = torch.optim.Adam(self.net.parameters(), lr)
+
     class Net(nn.Module):
         def __init__(self, state_shape, action_shape):
             super().__init__()
@@ -20,16 +25,11 @@ class DQN:
         def forward(self, obs, state=None, info={}):
             if not isinstance(obs, torch.Tensor):
                 obs = torch.tensor(obs, dtype=torch.float)
-            obs.to(self.device)
+            obs.to('cuda' if torch.cuda.is_available() else 'cpu')
             batch = obs.shape[0]
             logits = self.model(obs.view(batch, -1))
             # print("DQN Forward:", logits.shape)
             return logits, state
-
-    def __init__(self, state_shape, action_shape, device, lr, **kwargs):
-        self.device = device
-        self.net = self.Net(state_shape, action_shape).to(self.device)
-        self.optim = torch.optim.Adam(self.net.parameters(), lr)
 
     def __call__(self, **kwargs):
         return DQNPolicy(model=self.net, optim=self.optim, **kwargs)

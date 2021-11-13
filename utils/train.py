@@ -69,7 +69,7 @@ def get_args():
     parser.add_argument("--wandb-run-id", type=str, default=None)
 
     parser.add_argument("--trainer", type=str, default="off", choices=["off", "on"])
-    parser.add_argument("--save", action='store_true', default=False)
+    parser.add_argument("--save", action="store_true", default=False)
     parser.add_argument("--load-puck-id", type=str, default=None)
     parser.add_argument("--load-bar-id", type=str, default=None)
 
@@ -144,7 +144,9 @@ def train(args):
         else:
             policy_puck.load_state_dict(
                 torch.load(
-                    "saved_policies/{}/puck_{}.pth".format(args.load_puck_id, args.puck),
+                    "saved_policies/{}/puck_{}.pth".format(
+                        args.load_puck_id, args.puck
+                    ),
                     map_location=torch.device("cpu"),
                 )
             )
@@ -229,14 +231,14 @@ def train(args):
 
         save_path = "{}/log".format(save_folder)
         if not os.path.isfile(save_path):
-            with open(save_path, 'w') as f:
+            with open(save_path, "w") as f:
                 pass
         return save_path
 
     if not args.save:
         save_checkpoint_fn = None
     else:
-        assert(args.wandb_run_id is not None)
+        assert args.wandb_run_id is not None
 
     if args.trainer == "off":
         result = offpolicy_trainer(

@@ -37,7 +37,7 @@ class EnvWrapper(gym.Wrapper):
         )
 
     def step(self, action):
-        for agent, k in self.discrete:
+        for agent, k in self.discrete.items():
             if agent in self.discrete.keys():
                 action[agent] = unflatten(Discrete(self.discrete[agent]), action[agent])
 
@@ -59,7 +59,8 @@ class EnvWrapper(gym.Wrapper):
         elif self.modified_reward == "exp":
             if done:
                 rew = (
-                    2 * np.exp(-3 * (abs(obs[0] - obs[2]) + abs(obs[1] - obs[3])) ** 2) - 1
+                    2 * np.exp(-3 * (abs(obs[0] - obs[2]) + abs(obs[1] - obs[3])) ** 2)
+                    - 1
                 )
         else:
             raise Exception("Unidentified reward type")

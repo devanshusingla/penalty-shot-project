@@ -30,14 +30,15 @@ class GreedyPolicy(BasePolicy):
             else:
                 act[i] = np.sign(obs[1] - obs[3])
                 assert act[i] >= -1 and act[i] <= 1
-                
+
                 if self.agent != "bar":
-                    if np.abs(obs[1]-obs[3]) < 0.005:
+                    if np.abs(obs[1] - obs[3]) < 0.005:
                         if np.abs(obs[i]) < 0.1:
                             act[i] = np.sign(obs[1])
                         else:
                             act[i] = -np.sign(obs[1])
-                        if act[i] == 0: act[i] = 2*np.random.randint(2)-1
+                        if act[i] == 0:
+                            act[i] = 2 * np.random.randint(2) - 1
         return act
 
     def forward(self, batch: Batch, state=None, **kwargs):
