@@ -8,12 +8,29 @@ from tianshou.data import Collector, VectorReplayBuffer
 from tianshou.trainer import offpolicy_trainer, onpolicy_trainer
 from agents import TwoAgentPolicy
 from agents.lib_agents import *
-from .envs import make_render_env, make_env, make_discrete_env, make_render_discrete_env
+from .envs import make_envs, MakeEnv
+from .config import puck_params, bar_params, env_params
 import argparse
+
+algo_mapping = {
+    "sine": SinePolicy,
+    "random": RandomPolicy,
+    "greedy": GreedyPolicy,
+    "dqn": DQN,
+    "sac": SAC,
+    "ppo": PPO,
+    "ddpg": DDPG,
+}
 
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--puck", type=str, default="sine", choices=list(algo_mapping.keys())
+    )
+    parser.add_argument(
+        "--bar", type=str, default="ppo", choices=list(algo_mapping.keys())
+    )
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--discrete", action="store_true", default=False)
     parser.add_argument("--discrete-k", type=int, default=7)
@@ -24,18 +41,19 @@ def get_args():
         "--eps-train-decay", type=str, default="exp", choices=["exp", "lin", "const"]
     )
     parser.add_argument("--buffer-size", type=int, default=100000)
+    parser.add_argument("--stack-num", type=int, default=5)
     parser.add_argument("--exploration-noise", type=bool, default=True)
-    parser.add_argument("--lr", type=float, default=0.0001)
-    parser.add_argument("--gamma", type=float, default=0.99)
-    parser.add_argument("--n-step", type=int, default=3)
     parser.add_argument("--target-update-freq", type=int, default=500)
     parser.add_argument("--epoch", type=int, default=100)
-    parser.add_argument("--step-per-epoch", type=int, default=100000)
+    parser.add_argument("--step-per-epoch", type=int, default=10000)
     parser.add_argument("--step-per-collect", type=int, default=10)
     parser.add_argument("--update-per-step", type=float, default=0.1)
+    parser.add_argument("--repeat-per-collect", type=int, default=2)
+    parser.add_argument("--episode-per-test", type=int, default=100)
+    parser.add_argument("--episode-per-collect", type=int, default=10)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--training-num", type=int, default=10)
-    parser.add_argument("--test-num", type=int, default=100)
+    parser.add_argument("--training-num", type=int, default=1)
+    parser.add_argument("--test-num", type=int, default=2)
     parser.add_argument("--logdir", type=str, default="log")
     parser.add_argument("--render", type=float, default=0.0)
     parser.add_argument(
@@ -48,31 +66,26 @@ def get_args():
     parser.add_argument("--wandb-entity", type=str, default="penalty-shot-project")
     parser.add_argument("--wandb-run-id", type=str, default=None)
 
+    parser.add_argument("--trainer", type=str, default="off", choices=["off", "on"])
+
     return parser.parse_args()
 
 
-def main(args):
+def train(args):
 
     print(args.device)
     # create env
-    if args.discrete:
-        if args.render > 0:
-            env = make_render_discrete_env(args.render, args.discrete_k)
-        else:
-            env = make_discrete_env(args.discrete_k)
-    else:
-        if args.render > 0:
-            env = make_render_env(args.render)
-        else:
-            env = make_env()
+    env = MakeEnv(**env_params["train"]).create_env()
 
     args.state_shape = env.observation_space.shape
     args.action_shape = env.action_space.shape
     # print("Observations shape:", env.observation_space, args.state_shape)
     # print("Actions shape:", env.action_space, args.action_shape)
 
-    train_envs = SubprocVectorEnv([lambda: env for _ in range(args.training_num)])
-    test_envs = SubprocVectorEnv([lambda: env for _ in range(args.test_num)])
+    (train_envs_obj, train_envs) = make_envs(args.training_num, **env_params["train"])
+    train_envs = SubprocVectorEnv(train_envs)
+    (test_envs_obj, test_envs) = make_envs(args.test_num, **env_params["test"])
+    test_envs = SubprocVectorEnv(test_envs)
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -80,13 +93,38 @@ def main(args):
     test_envs.seed(args.seed)
 
     # define policies for puck and bar here
-    policy_puck = SinePolicy()
-    policy_bar = SAC(
-        env.action_space["bar"],
-        env.observation_space.shape,
-        env.action_space["bar"].shape,
-        args.device,
-    )(actor_lr=args.lr, critic_lr=args.lr, gamma=args.gamma, n_step=args.n_step)
+
+    if "call_params" in puck_params[args.puck]:
+        puck_params_init = (
+            puck_params[args.puck]["init_params"]
+            if "init_params" in puck_params[args.puck]
+            else {}
+        )
+        puck_params_call = (
+            puck_params[args.puck]["call_params"]
+            if "call_params" in puck_params[args.puck]
+            else {}
+        )
+
+        policy_puck = algo_mapping[args.puck](**puck_params_init)(**puck_params_call)
+    else:
+        policy_puck = algo_mapping[args.puck](**puck_params[args.puck])
+
+    if "call_params" in bar_params[args.bar]:
+        bar_params_init = (
+            bar_params[args.bar]["init_params"]
+            if "init_params" in bar_params[args.bar]
+            else {}
+        )
+        bar_params_call = (
+            bar_params[args.bar]["call_params"]
+            if "call_params" in bar_params[args.bar]
+            else {}
+        )
+
+        policy_bar = algo_mapping[args.bar](**bar_params_init)(**bar_params_call)
+    else:
+        policy_bar = algo_mapping[args.bar](**bar_params[args.bar])
 
     policy = TwoAgentPolicy(
         (policy_puck, policy_bar),
@@ -94,10 +132,19 @@ def main(args):
         action_space=env.action_space,
     )
 
+    if (args.puck == "sac" and puck_params["sac"]["call_params"]["recurrent"]) or (
+        args.bar == "sac" and bar_params["sac"]["call_params"]["recurrent"]
+    ):
+        buffer = VectorReplayBuffer(
+            args.buffer_size, args.training_num, stack_num=args.stack_num
+        )
+    else:
+        buffer = VectorReplayBuffer(args.buffer_size, args.training_num)
+
     train_collector = Collector(
         policy,
         train_envs,
-        VectorReplayBuffer(args.buffer_size, args.training_num),
+        buffer,
         exploration_noise=args.exploration_noise,
     )
     test_collector = Collector(
@@ -129,23 +176,35 @@ def main(args):
     def test_fn(epoch, env_step):
         policy.set_eps(args.eps_test)
 
-    result = offpolicy_trainer(
-        policy,
-        train_collector,
-        test_collector,
-        args.epoch,
-        args.step_per_epoch,
-        args.step_per_collect,
-        args.test_num,
-        args.batch_size,
-        train_fn=train_fn,
-        test_fn=test_fn,
-        logger=logger,
-        update_per_step=args.update_per_step,
-    )
+    if args.trainer == "off":
+        result = offpolicy_trainer(
+            policy,
+            train_collector,
+            test_collector,
+            args.epoch,
+            args.step_per_epoch,
+            args.step_per_collect,
+            args.test_num,
+            args.batch_size,
+            train_fn=train_fn,
+            test_fn=test_fn,
+            logger=logger,
+            update_per_step=args.update_per_step,
+        )
+    elif args.trainer == "on":
+        result = ts.trainer.onpolicy_trainer(
+            policy,
+            train_collector,
+            test_collector,
+            max_epoch=args.epoch,
+            step_per_epoch=args.step_per_epoch,
+            repeat_per_collect=args.repeat_per_collect,
+            episode_per_test=args.episode_per_test,
+            batch_size=args.batch_size,
+            episode_per_collect=args.episode_per_collect,
+            logger=logger,
+        )
+    else:
+        raise Exception("invalid trainer")
 
     pprint.print(result)
-
-
-if __name__ == "__main__":
-    main(get_args())

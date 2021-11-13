@@ -35,4 +35,4 @@ class DQN:
         return DQNPolicy(model=self.net, optim=self.optim, **kwargs)
 
     def __name__(self):
-        return 'DQN'
+        return "DQN"

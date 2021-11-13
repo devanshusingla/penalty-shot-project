@@ -103,7 +103,6 @@ class PSE(gym.Env):
         # bar_action = max(-1, min(1, action["bar"]))
         puck_action = np.clip(action["puck"], -1, 1)
         bar_action = np.clip(action["bar"], -1, 1)
-        
 
         if (
             puck_action < -1.0

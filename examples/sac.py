@@ -13,27 +13,24 @@ from agents.lib_agents import SAC
 
 from utils.envs import general_make_env
 
-train_params = {
-    'flatten': {}
-}
-test_params = {
-    'flatten': {},
-    'render': {
-        'eps': 0.02
-    }
-}
+train_params = {"flatten": {}}
+test_params = {"flatten": {}, "render": {"eps": 0.02}}
 env = general_make_env(train_params)
-train_envs = ts.env.DummyVectorEnv([partial(general_make_env, params=train_params) for _ in range(10)])
-test_envs = ts.env.DummyVectorEnv([partial(general_make_env, test_params) for _ in range(5)])
+train_envs = ts.env.DummyVectorEnv(
+    [partial(general_make_env, params=train_params) for _ in range(10)]
+)
+test_envs = ts.env.DummyVectorEnv(
+    [partial(general_make_env, test_params) for _ in range(5)]
+)
 
 # creating policies
 
 p1 = SinePolicy()
 p2 = SAC(
-    env.action_space["bar"], 
-    env.observation_space.shape, 
+    env.action_space["bar"],
+    env.observation_space.shape,
     env.action_space["bar"].shape,
-    device='cuda' if torch.cuda.is_available() else 'cpu'
+    device="cuda" if torch.cuda.is_available() else "cpu",
 )(n_step=1)
 policy = TwoAgentPolicy(
     observation_space=env.observation_space,

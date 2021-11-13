@@ -6,12 +6,13 @@ from tianshou.utils.net.common import ActorCritic, Net
 from tianshou.utils.net.continuous import ActorProb, Critic
 from torch.distributions import Independent, Normal
 
+
 def dist(*logits):
     return Independent(Normal(*logits), 1)
 
-class PPO:
 
-    def __init__(self, state_shape, action_space, hidden_sizes = [128, 128], **kwargs):
+class PPO:
+    def __init__(self, state_shape, action_space, hidden_sizes=[128, 128], **kwargs):
         self.state_shape = state_shape
         self.action_space = action_space
         self.action_shape = action_space.shape
@@ -19,10 +20,15 @@ class PPO:
         self.hidden_sizes = hidden_sizes
 
     def __call__(self, **kwargs):
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = "cuda" if torch.cuda.is_available() else "cpu"
         actor_net = Net(self.state_shape, hidden_sizes=self.hidden_sizes, device=device)
-        actor = ActorProb(actor_net, self.action_shape, max_action=self.max_action, device=device).to(device)
-        critic = Critic(Net(self.state_shape, 1, hidden_sizes=self.hidden_sizes, device=device), device=device).to(device)
+        actor = ActorProb(
+            actor_net, self.action_shape, max_action=self.max_action, device=device
+        ).to(device)
+        critic = Critic(
+            Net(self.state_shape, 1, hidden_sizes=self.hidden_sizes, device=device),
+            device=device,
+        ).to(device)
         actor_critic = ActorCritic(actor, critic)
         for m in actor_critic.modules():
             if isinstance(m, torch.nn.Linear):
@@ -35,7 +41,8 @@ class PPO:
             optim=optim,
             dist_fn=dist,
             action_space=self.action_space,
-            **kwargs)
-    
+            **kwargs
+        )
+
     def __name__(self):
         return "PPO"
