@@ -57,9 +57,10 @@ class EnvWrapper(gym.Wrapper):
         if self.modified_reward == None:
             rew = rew
         elif self.modified_reward == "exp":
-            rew = (
-                2 * np.exp(-3 * (abs(obs[0] - obs[2]) + abs(obs[1] - obs[3])) ** 2) - 1
-            )
+            if done:
+                rew = (
+                    2 * np.exp(-3 * (abs(obs[0] - obs[2]) + abs(obs[1] - obs[3])) ** 2) - 1
+                )
         else:
             raise Exception("Unidentified reward type")
 

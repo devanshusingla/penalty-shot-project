@@ -135,20 +135,35 @@ def train(args):
 
     if args.load_puck_id is not None:
         assert args.wandb_run_id is not None
-        policy_puck.load_state_dict(
-            torch.load(
-                "saved_policies/{}/puck_{}.pth".format(args.load_puck_id, args.puck)
+        if args.device == "cuda":
+            policy_puck.load_state_dict(
+                torch.load(
+                    "saved_policies/{}/puck_{}.pth".format(args.load_puck_id, args.puck)
+                )
             )
-        )
+        else:
+            policy_puck.load_state_dict(
+                torch.load(
+                    "saved_policies/{}/puck_{}.pth".format(args.load_puck_id, args.puck),
+                    map_location=torch.device("cpu"),
+                )
+            )
 
     if args.load_bar_id is not None:
         assert args.wandb_run_id is not None
-        policy_bar.load_state_dict(
-            torch.load(
-                "saved_policies/{}/bar_{}.pth".format(args.load_bar_id, args.bar)
+        if args.device == "cuda":
+            policy_bar.load_state_dict(
+                torch.load(
+                    "saved_policies/{}/bar_{}.pth".format(args.load_bar_id, args.bar)
+                )
             )
-        )
-
+        else:
+            policy_bar.load_state_dict(
+                torch.load(
+                    "saved_policies/{}/bar_{}.pth".format(args.load_bar_id, args.bar),
+                    map_location=torch.device("cpu"),
+                )
+            )
     policy = TwoAgentPolicy(
         (policy_puck, policy_bar),
         observation_space=env.observation_space,
