@@ -9,7 +9,10 @@ state_shape = state_space.shape
 
 puck_params = {
     "sine": {},
-    "greedy": {},
+    "greedy": {
+        'agent': 'puck',
+        'disc_k': None,
+    },
     "ppo": {
         "init_params": {
             "state_shape": env.observation_space.shape,

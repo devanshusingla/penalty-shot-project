@@ -8,6 +8,11 @@ state_space = env.observation_space
 state_shape = state_space.shape
 
 bar_params = {
+    "greedy": {
+        'agent': 'bar',
+        'disc_k': None
+    },
+    "sine": {},
     "ppo": {
         "init_params": {
             "state_shape": env.observation_space.shape,
