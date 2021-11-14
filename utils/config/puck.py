@@ -2,7 +2,7 @@ from utils.envs import MakeEnv
 import torch
 
 env = MakeEnv().create_env()
-action_space = env.action_space["bar"]
+action_space = env.action_space["puck"]
 action_shape = action_space.shape
 state_space = env.observation_space
 state_shape = state_space.shape
