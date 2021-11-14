@@ -50,7 +50,6 @@ class TwoAgentPolicy(BasePolicy):
         bar_out = self.bar_policy.forward(
             bar_batch, state, **(other_params.get("puck", {}))
         )
-
         out = Batch(
             act=Batch(puck=puck_out.act, bar=bar_out.act),
             state=np.column_stack((puck_out.state, bar_out.state))
@@ -76,7 +75,6 @@ class TwoAgentPolicy(BasePolicy):
                 ),
             }
         )
-
         return out
 
     def map_action(self, act):

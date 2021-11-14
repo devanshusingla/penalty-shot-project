@@ -48,6 +48,7 @@ class SAC:
                 len(self.actor_hidden_shape),
                 self.state_shape,
                 self.action_shape,
+                unbounded=True,
                 hidden_layer_size=self.actor_hidden_shape[0],
                 device=self.device,
             ).to(self.device)
@@ -57,10 +58,13 @@ class SAC:
                 hidden_sizes=self.actor_hidden_shape,
                 device=self.device,
             )
+            # Initialize the actor network with random weights and biases
+
             actor = ActorProb(
                 actor_net,
                 self.action_shape,
                 self.actor_hidden_shape,
+                unbounded=True,
                 device=self.device,
             ).to(self.device)
         actor_opt = torch.optim.Adam(actor.parameters(), lr=actor_lr)

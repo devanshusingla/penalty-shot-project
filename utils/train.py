@@ -274,4 +274,4 @@ def train(args):
     else:
         raise Exception("invalid trainer")
 
-    pprint.print(result)
+    pprint.pprint(result)

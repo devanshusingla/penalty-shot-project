@@ -27,8 +27,7 @@ class PSE(gym.Env):
             maxEpisodes (int, optional): Maximum number of episodes. Defaults to 90.
             puck_start (tuple, optional): Normalised start (x, y) coordinates for the puck. Defaults to (-0.75, 0).
             bar_start (tuple, optional): Normalised start (x, y) coordinates for the bar. Defaults to (0.75, 0).
-            screen_size (tuple, optional): A
-            ctual screen size (height, width). Defaults to (480, 640).
+            screen_size (tuple, optional): Actual screen size (height, width). Defaults to (480, 640).
             goal_nrm (float, optional): Normalised x-coordinate defining the goal line. Defaults to 0.77.
             bar_size (tuple, optional): Normalised values for size of the bar (length, width). Defaults to (1/6, 1/128).
             puck_diameter (float, optional): Normalised diameter of the puck. Defaults to 1/64.
@@ -53,7 +52,7 @@ class PSE(gym.Env):
 
         self.v_ind = 0  # Indicator variable used to check whether the bar can accelerate in next step
         self.theta = 0
-        self.startState = (self.puck_start, self.bar_start, 0, 0)
+        self.startState = (self.puck_start, self.bar_start, 0, 3)
         self.v_p = (self.goal_nrm - self.puck_start[0]) / self.max_episodes
         self.bar_action_space = gym.spaces.Box(
             low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32
