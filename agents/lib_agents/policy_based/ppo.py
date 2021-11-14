@@ -19,7 +19,7 @@ class PPO:
         self.max_action = action_space.high[0]
         self.hidden_sizes = hidden_sizes
 
-    def __call__(self, **kwargs):
+    def __call__(self, lr=1e-3, **kwargs):
         device = "cuda" if torch.cuda.is_available() else "cpu"
         actor_net = Net(self.state_shape, hidden_sizes=self.hidden_sizes, device=device)
         actor = ActorProb(
@@ -34,7 +34,7 @@ class PPO:
             if isinstance(m, torch.nn.Linear):
                 torch.nn.init.orthogonal_(m.weight)
                 torch.nn.init.zeros_(m.bias)
-        optim = torch.optim.Adam(actor_critic.parameters(), lr=1e-3)
+        optim = torch.optim.Adam(actor_critic.parameters(), lr=lr)
         return PPOPolicy(
             actor=actor,
             critic=critic,

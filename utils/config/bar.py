@@ -42,7 +42,7 @@ bar_params = {
             "critic_lr": 0.001,
             "tau": 0.005,
             "gamma": 1.0,
-            "n_step": 1,
+            "n_step": 4,
             "recurrent": False,
             "exploration_noise": GaussianNoise(sigma=0.3)
         },

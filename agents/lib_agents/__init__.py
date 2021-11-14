@@ -1,4 +1,4 @@
-from .trivial import RandomPolicy, SinePolicy, GreedyPolicy
+from .trivial import RandomPolicy, SinePolicy, GreedyPolicy, SmurvePolicy
 
 from .value_based import DQN
 

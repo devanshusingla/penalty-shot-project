@@ -13,13 +13,17 @@ puck_params = {
         "agent": "puck",
         "disc_k": None,
     },
+    "smurve": {},
     "ppo": {
         "init_params": {
             "state_shape": env.observation_space.shape,
             "action_space": action_space,
             "hidden_size": [128, 128],
         },
-        "call_params": {"discount_factor": 0.99},
+        "call_params": {
+            "discount_factor": 1,
+            "lr": 5e-4,
+            },
     },
     "dqn": {"init_params": {}, "call_params": {}},
     "sac": {

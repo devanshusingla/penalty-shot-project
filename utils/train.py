@@ -18,6 +18,7 @@ algo_mapping = {
     "sine": SinePolicy,
     "random": RandomPolicy,
     "greedy": GreedyPolicy,
+    "smurve": SmurvePolicy,
     "dqn": DQN,
     "sac": SAC,
     "ppo": PPO,

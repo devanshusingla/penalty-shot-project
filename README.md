@@ -7,6 +7,7 @@
 pip install tianshou
 pip install gym==0.19 -U
 pip install -e ./gym-env
+pip install smurves
 ```
 ### To Run:
 Open 3 terminals and run 
