@@ -64,7 +64,7 @@ class SAC:
                 actor_net,
                 self.action_shape,
                 self.actor_hidden_shape,
-                unbounded=True,
+                unbounded=False,
                 device=self.device,
             ).to(self.device)
         actor_opt = torch.optim.Adam(actor.parameters(), lr=actor_lr)

@@ -52,11 +52,11 @@ def get_args():
     parser.add_argument("--step-per-collect", type=int, default=10)
     parser.add_argument("--update-per-step", type=float, default=0.1)
     parser.add_argument("--repeat-per-collect", type=int, default=2)
-    parser.add_argument("--episode-per-test", type=int, default=100)
+    parser.add_argument("--episode-per-test", type=int, default=10)
     parser.add_argument("--episode-per-collect", type=int, default=10)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--training-num", type=int, default=1)
-    parser.add_argument("--test-num", type=int, default=2)
+    parser.add_argument("--training-num", type=int, default=10)
+    parser.add_argument("--test-num", type=int, default=100)
     parser.add_argument("--logdir", type=str, default="log")
     parser.add_argument("--render", type=float, default=0.0)
     parser.add_argument(
@@ -64,7 +64,7 @@ def get_args():
     )
 
     parser.add_argument("--wandb-save-interval", type=int, default=1)
-    parser.add_argument("--wandb-project", type=str, default="test-project")
+    parser.add_argument("--wandb-project", type=str, default="final-project")
     parser.add_argument("--wandb-name", type=str, required=True)
     parser.add_argument("--wandb-entity", type=str, default="penalty-shot-project")
     parser.add_argument("--wandb-run-id", type=str, default=None)

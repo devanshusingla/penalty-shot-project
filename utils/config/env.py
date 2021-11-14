@@ -1,11 +1,15 @@
 env_params = {
     "train": {
-        "discrete": {},
+        "discrete": {
+            
+        },
         "modified_reward": "exp",
         "render_skip_ep": 10,
     },
     "test": {
-        "discrete": {},
+        "discrete": {
+            
+        },
         "modified_reward": None,
         "render_skip_ep": 10,
     },
