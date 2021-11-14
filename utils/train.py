@@ -249,7 +249,7 @@ def train(args):
             args.epoch,
             args.step_per_epoch,
             args.step_per_collect,
-            args.test_num,
+            args.episode_per_test,
             args.batch_size,
             train_fn=train_fn,
             test_fn=test_fn,
