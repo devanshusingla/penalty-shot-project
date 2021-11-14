@@ -43,20 +43,20 @@ def get_args():
     parser.add_argument(
         "--eps-train-decay", type=str, default="exp", choices=["exp", "lin", "const"]
     )
-    parser.add_argument("--buffer-size", type=int, default=100000)
+    parser.add_argument("--buffer-size", type=int, default=10000)
     parser.add_argument("--stack-num", type=int, default=5)
     parser.add_argument("--exploration-noise", type=bool, default=True)
     parser.add_argument("--target-update-freq", type=int, default=500)
-    parser.add_argument("--epoch", type=int, default=100)
+    parser.add_argument("--epoch", type=int, default=20)
     parser.add_argument("--step-per-epoch", type=int, default=10000)
     parser.add_argument("--step-per-collect", type=int, default=10)
     parser.add_argument("--update-per-step", type=float, default=0.1)
     parser.add_argument("--repeat-per-collect", type=int, default=2)
     parser.add_argument("--episode-per-test", type=int, default=100)
     parser.add_argument("--episode-per-collect", type=int, default=10)
-    parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--training-num", type=int, default=1)
-    parser.add_argument("--test-num", type=int, default=2)
+    parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--training-num", type=int, default=10)
+    parser.add_argument("--test-num", type=int, default=100)
     parser.add_argument("--logdir", type=str, default="log")
     parser.add_argument("--render", type=float, default=0.0)
     parser.add_argument(
@@ -73,6 +73,7 @@ def get_args():
     parser.add_argument("--save", action="store_true", default=False)
     parser.add_argument("--load-puck-id", type=str, default=None)
     parser.add_argument("--load-bar-id", type=str, default=None)
+    parser.add_argument("--run-id", type=str, default=None)
 
     return parser.parse_args()
 
@@ -135,7 +136,6 @@ def train(args):
     # Loading policies
 
     if args.load_puck_id is not None:
-        assert args.wandb_run_id is not None
         if args.device == "cuda":
             policy_puck.load_state_dict(
                 torch.load(
@@ -153,7 +153,6 @@ def train(args):
             )
 
     if args.load_bar_id is not None:
-        assert args.wandb_run_id is not None
         if args.device == "cuda":
             policy_bar.load_state_dict(
                 torch.load(
@@ -218,7 +217,7 @@ def train(args):
         policy.set_eps(args.eps_test)
 
     def save_checkpoint_fn(epoch: int, env_step: int, gradient_step: int):
-        save_folder = "saved_policies/{}".format(args.wandb_run_id)
+        save_folder = "saved_policies/{}".format(args.run_id)
         if not os.path.isdir(save_folder):
             os.makedirs(save_folder)
 
@@ -238,8 +237,6 @@ def train(args):
 
     if not args.save:
         save_checkpoint_fn = None
-    else:
-        assert args.wandb_run_id is not None
 
     if args.trainer == "off":
         result = offpolicy_trainer(

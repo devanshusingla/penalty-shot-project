@@ -64,7 +64,7 @@ class SAC:
                 actor_net,
                 self.action_shape,
                 self.actor_hidden_shape,
-                unbounded=True,
+                unbounded=False,
                 device=self.device,
             ).to(self.device)
         actor_opt = torch.optim.Adam(actor.parameters(), lr=actor_lr)
@@ -107,6 +107,11 @@ class SAC:
             critic2 = Critic(critic_net2, device=self.device).to(self.device)
         critic_opt2 = torch.optim.Adam(critic2.parameters(), lr=critic_lr)
 
+        target_entropy = -np.prod(self.action_shape)
+        log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
+        alpha_optim = torch.optim.Adam([log_alpha], lr=3e-4)
+        alpha = (target_entropy, log_alpha, alpha_optim)
+
         return SACPolicy(
             actor,
             actor_opt,
@@ -116,6 +121,7 @@ class SAC:
             critic_opt2,
             tau=tau,
             gamma=gamma,
+            alpha=alpha,
             estimation_step=n_step,
             exploration_noise=self.noise,
             action_space=self.action_space,

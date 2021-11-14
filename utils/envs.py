@@ -78,6 +78,6 @@ class MakeEnv:
 
 def make_envs(num_envs: int = 1, render_env_count: int = 1, **kwargs):
     envs = [MakeEnv(render=True, **kwargs) for _ in range(render_env_count)] + [
-        MakeEnv(render=False, **kwargs) for _ in range(num_envs - 1)
+        MakeEnv(render=False, **kwargs) for _ in range(num_envs - render_env_count)
     ]
     return (envs, [env.create_env for env in envs])

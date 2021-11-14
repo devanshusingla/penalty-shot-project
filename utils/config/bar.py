@@ -1,5 +1,6 @@
 from utils.envs import MakeEnv
 import torch
+from tianshou.exploration import GaussianNoise
 
 env = MakeEnv().create_env()
 action_space = env.action_space["bar"]
@@ -41,8 +42,9 @@ bar_params = {
             "critic_lr": 0.001,
             "tau": 0.005,
             "gamma": 1.0,
-            "n_step": 4,
-            "recurrent": True,
+            "n_step": 1,
+            "recurrent": False,
+            "exploration_noise": GaussianNoise(sigma=0.3)
         },
     },
     "ddpg": {
