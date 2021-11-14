@@ -22,6 +22,7 @@ algo_mapping = {
     "sac": SAC,
     "ppo": PPO,
     "ddpg": DDPG,
+    "td3": TD3,
 }
 
 
