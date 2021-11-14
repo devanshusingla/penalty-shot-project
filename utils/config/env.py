@@ -6,7 +6,7 @@ env_params = {
     },
     "test": {
         "discrete": {},
-        "modified_reward": "exp",
+        "modified_reward": None,
         "render_skip_ep": 10,
     },
 }
