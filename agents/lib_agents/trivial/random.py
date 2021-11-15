@@ -9,6 +9,7 @@ class RandomPolicy(BasePolicy):
     Args:
         BasePolicy (): The base policy class.
     """
+
     def __init__(
         self, max_consecutive_steps: int, seed: int = 0, max_steps: int = 90, **kwargs
     ):

@@ -282,8 +282,7 @@ class PSE(gym.Env):
         return self.viewer.render(return_rgb_array=mode == "rgb_array")
 
     def close(self):
-        """Closes the environment.
-        """
+        """Closes the environment."""
         if self.viewer:
             self.viewer.close()
             self.viewer = None

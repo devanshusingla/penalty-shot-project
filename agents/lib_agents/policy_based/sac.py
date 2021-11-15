@@ -15,8 +15,8 @@ from torch._C import device
 
 
 class SAC:
-    """Implementation of SAC Policy
-    """
+    """Implementation of SAC Policy"""
+
     def __init__(
         self,
         action_space,

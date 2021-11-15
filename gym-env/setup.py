@@ -13,6 +13,6 @@ setup(
         "torch",
         "tianshou",
         "wandb",
-        "smurves"
+        "smurves",
     ],  # Python packages required by our environments.
 )

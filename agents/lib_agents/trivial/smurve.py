@@ -10,16 +10,14 @@ class SmurvePolicy(BasePolicy):
     Args:
         BasePolicy (): The base policy class.
     """
-    def __init__(
-        self,
-        seed: int = 0,
-        max_steps: int = 90,
-        **kwargs
-    ):
+
+    def __init__(self, seed: int = 0, max_steps: int = 90, **kwargs):
         super().__init__(**kwargs)
         self.rng = np.random.default_rng(seed)
-        self.max_steps = max_steps # Maximum number of steps taken by the agent in an episode
-        self.param = {} # Dictionary to store generated trajectories
+        self.max_steps = (
+            max_steps  # Maximum number of steps taken by the agent in an episode
+        )
+        self.param = {}  # Dictionary to store generated trajectories
 
     def _get_action(self, info_batch: Batch, done_batch: Batch):
         """Calculates the action given the observation batch and information batch according to smurve policy.
@@ -64,12 +62,14 @@ class SmurvePolicy(BasePolicy):
         Returns:
             List[Float]: List of actions to take to obtain the trajectory
         """
-        curves = surgebinder(n_curves = 1,
-                     x_interval = [0.0, 91.0],
-                     y_interval = [0.0, 2.0],
-                     n_measure = 92,
-                     direction_maximum = 50,
-                     convergence_point = [0.0, 1.0])
+        curves = surgebinder(
+            n_curves=1,
+            x_interval=[0.0, 91.0],
+            y_interval=[0.0, 2.0],
+            n_measure=92,
+            direction_maximum=50,
+            convergence_point=[0.0, 1.0],
+        )
         traj = np.array(curves)[0]
         traj[:, 1] -= 1
         actions = np.diff(traj[:, 1])

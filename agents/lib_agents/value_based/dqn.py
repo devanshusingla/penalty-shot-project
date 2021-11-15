@@ -4,12 +4,14 @@ from torch import nn
 
 
 class DQN:
-    """Implements the DQN Policy
-    """
+    """Implements the DQN Policy"""
+
     def __init__(self, state_shape, action_shape, device, lr, **kwargs):
         self.device = device
-        self.net = self.Net(state_shape, action_shape).to(self.device) # Self implemented network
-        self.optim = torch.optim.Adam(self.net.parameters(), lr) # Adam optimiser
+        self.net = self.Net(state_shape, action_shape).to(
+            self.device
+        )  # Self implemented network
+        self.optim = torch.optim.Adam(self.net.parameters(), lr)  # Adam optimiser
 
     class Net(nn.Module):
         """Neural net implementation of the DQN policy.
@@ -17,6 +19,7 @@ class DQN:
         Args:
             nn (Any): Base neural network
         """
+
         def __init__(self, state_shape, action_shape):
             super().__init__()
             self.model = nn.Sequential(
@@ -42,7 +45,7 @@ class DQN:
             """
             if not isinstance(obs, torch.Tensor):
                 obs = torch.tensor(obs, dtype=torch.float)
-            obs.to('cuda' if torch.cuda.is_available() else 'cpu')
+            obs.to("cuda" if torch.cuda.is_available() else "cpu")
             batch = obs.shape[0]
             logits = self.model(obs.view(batch, -1))
             return logits, state

@@ -9,6 +9,7 @@ class GreedyPolicy(BasePolicy):
     Args:
         BasePolicy (): The base policy class.
     """
+
     def __init__(
         self,
         seed: int = 0,
@@ -19,9 +20,11 @@ class GreedyPolicy(BasePolicy):
     ):
         super().__init__(**kwargs)
         self.rng = np.random.default_rng(seed)
-        self.max_steps = max_steps # Maximum number of steps taken by the agent in an episode
-        self.agent = agent # Name of the agent
-        self.disc_k = disc_k # Number of pieces action has to discretized into
+        self.max_steps = (
+            max_steps  # Maximum number of steps taken by the agent in an episode
+        )
+        self.agent = agent  # Name of the agent
+        self.disc_k = disc_k  # Number of pieces action has to discretized into
 
     def _get_action(self, obs_batch: Batch, info_batch: Batch):
         """Calculates the greedy action given the observation batch and information batch
@@ -51,8 +54,8 @@ class GreedyPolicy(BasePolicy):
                 assert act[i] >= -1 and act[i] <= 1
 
                 if self.agent != "bar":
-                # Greedy action for the puck depending on 
-                # where is more open area away from bar
+                    # Greedy action for the puck depending on
+                    # where is more open area away from bar
                     if np.abs(obs[1] - obs[3]) < 0.005:
                         if np.abs(obs[i]) < 0.1:
                             act[i] = np.sign(obs[1])

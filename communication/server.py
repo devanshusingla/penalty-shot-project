@@ -116,10 +116,7 @@ class PSServer:
                 print("agent bar disconnected")
                 break
             bar_action = pickle.loads(msg)
-            action = {
-                "puck": puck_action,
-                "bar" : bar_action
-            }
+            action = {"puck": puck_action, "bar": bar_action}
             res = self.env.step(action)
             self.puck.send(pickle.dumps(res))
             self.bar.send(pickle.dumps(res))

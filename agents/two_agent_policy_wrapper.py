@@ -5,19 +5,20 @@ from tianshou.policy import BasePolicy
 import numpy as np
 from copy import deepcopy
 
+
 class TwoAgentPolicy(BasePolicy):
     """Two Agent Policy Wrapper
 
     Args:
         BasePolicy (Any): The base policy class
     """
+
     def __init__(self, policies: Tuple[BasePolicy, BasePolicy], **kwargs):
         super().__init__(**kwargs)
         (self.puck_policy, self.bar_policy) = policies
 
     def _partition_batch(self, batch: Batch):
-        """Partitions the batch into two batches, one for puck and one for bar.
-        """
+        """Partitions the batch into two batches, one for puck and one for bar."""
         puck_batch = batch
         bar_batch = deepcopy(batch)
 
@@ -111,6 +112,7 @@ class TwoAgentPolicy(BasePolicy):
     """
         These three functions are called in update function of BasePolicy in the order process_fn -> learn -> post_process_fn one after another.
     """
+
     def process_fn(
         self, batch: Batch, buffer: ReplayBuffer, indices: np.ndarray
     ) -> Batch:

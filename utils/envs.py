@@ -13,6 +13,7 @@ class EnvWrapper(gym.Wrapper):
     Args:
         gym (): Gym Wrapper Class
     """
+
     def __init__(
         self,
         env,
@@ -94,8 +95,8 @@ class EnvWrapper(gym.Wrapper):
 
 
 class MakeEnv:
-    """Creates enviroment with gym make
-    """
+    """Creates enviroment with gym make"""
+
     def __init__(self, **kwargs):
         self.args = kwargs
 

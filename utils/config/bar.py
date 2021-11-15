@@ -18,7 +18,7 @@ bar_params = {
             "hidden_size": [128, 128],
         },
         "call_params": {"discount_factor": 0.99},
-        "trainer": "on"
+        "trainer": "on",
     },
     "dqn": {
         "init_params": {
@@ -45,9 +45,9 @@ bar_params = {
             "gamma": 1.0,
             "n_step": 4,
             "recurrent": False,
-            "exploration_noise": GaussianNoise(sigma=0.3)
+            "exploration_noise": GaussianNoise(sigma=0.3),
         },
-        "trainer" : "off"
+        "trainer": "off",
     },
     "ddpg": {
         "init_params": {
@@ -65,7 +65,7 @@ bar_params = {
             "gamma": 1.0,
             "n_step": 4,
         },
-        "trainer": "off"
+        "trainer": "off",
     },
     "td3": {
         "init_params": {
@@ -83,6 +83,6 @@ bar_params = {
             "gamma": 1.0,
             "n_step": 4,
         },
-        "trainer" : "off"
+        "trainer": "off",
     },
 }

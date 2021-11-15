@@ -17,8 +17,8 @@ def dist(*logits):
 
 
 class PPO:
-    """Implementation of the PPO Algorithm for the penalty shot task problem
-    """
+    """Implementation of the PPO Algorithm for the penalty shot task problem"""
+
     def __init__(self, state_shape, action_space, hidden_sizes=[128, 128], **kwargs):
         self.state_shape = state_shape
         self.action_space = action_space

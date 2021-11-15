@@ -31,6 +31,7 @@ algo_mapping = {
 policy = None
 args = None
 
+
 def train_fn(epoch, env_step):
     """Hook called at beginning of training
 
@@ -51,6 +52,7 @@ def train_fn(epoch, env_step):
         )
     policy.set_eps(eps)
 
+
 def test_fn(epoch, env_step):
     """Test hook function called while training
 
@@ -59,6 +61,7 @@ def test_fn(epoch, env_step):
         env_step (int): Step number in the environment
     """
     policy.set_eps(args.eps_test)
+
 
 def save_checkpoint_fn(epoch: int, env_step: int, gradient_step: int):
     """Function hook to save model
@@ -88,6 +91,7 @@ def save_checkpoint_fn(epoch: int, env_step: int, gradient_step: int):
         with open(save_path, "w") as f:
             pass
     return save_path
+
 
 def get_args():
     """Retuns the arguments for the script
@@ -145,6 +149,7 @@ def get_args():
 
     return parser.parse_args()
 
+
 def init_and_call_policy():
     """Initialises and calls policies for the agent puck and bar
 
@@ -184,6 +189,7 @@ def init_and_call_policy():
         policy_bar = algo_mapping[args.bar](**bar_params[args.bar])
 
     return (policy_puck, policy_bar)
+
 
 def load_policy(policy_puck, policy_bar):
     """Loads the policy if the load_puck_id and load_bar_id are not None
@@ -230,6 +236,7 @@ def load_policy(policy_puck, policy_bar):
             )
     return policy_puck, policy_bar
 
+
 def train():
     """Trains the agent puck and bar
 
@@ -250,7 +257,9 @@ def train():
     train_envs = SubprocVectorEnv(train_envs)
     (test_envs_obj, test_envs) = make_envs(args.test_num, **env_params["test"])
     test_envs = SubprocVectorEnv(test_envs)
-    print(f"Created {args.training_num} training environments and {args.test_num} test environments..")
+    print(
+        f"Created {args.training_num} training environments and {args.test_num} test environments.."
+    )
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -301,9 +310,11 @@ def train():
         save_checkpoint_fn = None
 
     print("Starting training and testing model ..")
-    if (args.trainer == "off" 
-    and puck_params[args.puck].get("trainer", "off") == "off"
-    and bar_params[args.bar].get("trainer", "off") == "off"):
+    if (
+        args.trainer == "off"
+        and puck_params[args.puck].get("trainer", "off") == "off"
+        and bar_params[args.bar].get("trainer", "off") == "off"
+    ):
         result = offpolicy_trainer(
             policy,
             train_collector,
@@ -319,9 +330,11 @@ def train():
             update_per_step=args.update_per_step,
             save_checkpoint_fn=save_checkpoint_fn,
         )
-    elif (args.trainer == "on" 
-    and puck_params[args.puck].get("trainer", "on") == "on"
-    and bar_params[args.bar].get("trainer", "on") == "on"):
+    elif (
+        args.trainer == "on"
+        and puck_params[args.puck].get("trainer", "on") == "on"
+        and bar_params[args.bar].get("trainer", "on") == "on"
+    ):
         result = ts.trainer.onpolicy_trainer(
             policy,
             train_collector,
@@ -339,6 +352,7 @@ def train():
         raise Exception("Invalid trainer with algorithm")
 
     pprint.pprint(result)
+
 
 if __name__ == "__main__":
     args = get_args()

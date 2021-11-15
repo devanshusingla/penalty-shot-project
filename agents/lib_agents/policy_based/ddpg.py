@@ -9,8 +9,8 @@ from torch._C import device
 
 
 class DDPG:
-    """Implements the DDPG algorithm for penalty shot kick task problem
-    """
+    """Implements the DDPG algorithm for penalty shot kick task problem"""
+
     def __init__(
         self,
         action_space,

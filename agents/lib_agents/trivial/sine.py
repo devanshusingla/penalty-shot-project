@@ -9,6 +9,7 @@ class SinePolicy(BasePolicy):
     Args:
         BasePolicy (): The base policy class
     """
+
     def __init__(
         self,
         max_cycles: int = 2,
@@ -19,9 +20,11 @@ class SinePolicy(BasePolicy):
     ):
         super().__init__(**kwargs)
         self.rng = np.random.default_rng(seed)
-        self.max_steps = max_steps # Maximum number of steps the agent will move for in each episode
-        self.max_cycles = max_cycles # Maximum number of cycles
-        self.min_magnitude = min_magnitude # Minimum magnitude of the action
+        self.max_steps = (
+            max_steps  # Maximum number of steps the agent will move for in each episode
+        )
+        self.max_cycles = max_cycles  # Maximum number of cycles
+        self.min_magnitude = min_magnitude  # Minimum magnitude of the action
         self.param = {}
 
     def _get_action(self, info_batch: Batch, done_batch: Batch):

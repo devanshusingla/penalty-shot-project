@@ -12,8 +12,8 @@ from torch._C import device
 
 
 class TD3:
-    """Implements the TD3 Algorithm
-    """
+    """Implements the TD3 Algorithm"""
+
     def __init__(
         self,
         action_space,

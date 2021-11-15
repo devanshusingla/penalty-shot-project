@@ -23,7 +23,7 @@ puck_params = {
         "call_params": {
             "discount_factor": 1,
             "lr": 5e-4,
-            },
+        },
     },
     "dqn": {"init_params": {}, "call_params": {}},
     "sac": {
