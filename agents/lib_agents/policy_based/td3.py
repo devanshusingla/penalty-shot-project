@@ -12,6 +12,8 @@ from torch._C import device
 
 
 class TD3:
+    """Implements the TD3 Algorithm
+    """
     def __init__(
         self,
         action_space,
@@ -42,6 +44,22 @@ class TD3:
         noise_clip=0.5,
         **kwargs
     ):
+        """Creates an actor and two critic nets and returns an instance of TD3 Policy initialised with them
+
+        Args:
+            actor_lr (float, optional): Learning rate for the actor. Defaults to 0.001.
+             critic_lr (float, optional): Learning rate for the critic. Defaults to 0.001.
+            tau (float, optional): Soft parameter for computing actions. Defaults to 0.005.
+            gamma (float, optional): Discount factor. Defaults to 1.0.
+            n_step (int, optional): Number of steps to look ahead. Defaults to 4.
+            exploration_noise (float, optional): Sigma for gaussian noise . Defaults to 0.3.
+            policy_noice (float, optional): Noise parameter for policy. Defaults to 0.2.
+            update_actor_freq (int, optional): Frequency of updating actor. Defaults to 2.
+            noise_clip (float, optional): Noise clipping parameter. Defaults to 0.5.
+
+        Returns:
+            Instance of TD3 Policy
+        """
         actor_net = Net(
             self.state_shape,
             hidden_sizes=self.actor_hidden_shape,

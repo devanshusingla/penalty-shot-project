@@ -1,21 +1,23 @@
-import gym
-
 from typing import List, Tuple
-import tianshou as ts
 from tianshou.data import Batch
 from tianshou.data.buffer.base import ReplayBuffer
 from tianshou.policy import BasePolicy
 import numpy as np
-
 from copy import deepcopy
 
-
 class TwoAgentPolicy(BasePolicy):
+    """Two Agent Policy Wrapper
+
+    Args:
+        BasePolicy (Any): The base policy class
+    """
     def __init__(self, policies: Tuple[BasePolicy, BasePolicy], **kwargs):
         super().__init__(**kwargs)
         (self.puck_policy, self.bar_policy) = policies
 
     def _partition_batch(self, batch: Batch):
+        """Partitions the batch into two batches, one for puck and one for bar.
+        """
         puck_batch = batch
         bar_batch = deepcopy(batch)
 
@@ -41,7 +43,16 @@ class TwoAgentPolicy(BasePolicy):
         other_params: dict = {},
         **kwargs,
     ) -> Batch:
+        """Forwards the batch to the policy.
 
+        Args:
+            batch (Batch): Current batch
+            state (Any, optional): Unknown. Defaults to None.
+            other_params (dict, optional): Other params to be passed forward. Defaults to {}.
+
+        Returns:
+            Batch: Batch to ne forwared
+        """
         (puck_batch, bar_batch) = self._partition_batch(batch)
 
         puck_out = self.puck_policy.forward(
@@ -78,6 +89,14 @@ class TwoAgentPolicy(BasePolicy):
         return out
 
     def map_action(self, act):
+        """Maps actions according to the policy.
+
+        Args:
+            act (Dict[Str, List[Float]]): Dictionary of actions for the puck and the bar.
+
+        Returns:
+            Dict[Str, List[Float]]: Dictionary of actions for the puck and the bar after being mapped
+        """
         act["bar"] = self.bar_policy.map_action(act["bar"])
         act["puck"] = self.puck_policy.map_action(act["puck"])
         return act
@@ -92,7 +111,6 @@ class TwoAgentPolicy(BasePolicy):
     """
         These three functions are called in update function of BasePolicy in the order process_fn -> learn -> post_process_fn one after another.
     """
-
     def process_fn(
         self, batch: Batch, buffer: ReplayBuffer, indices: np.ndarray
     ) -> Batch:
@@ -115,7 +133,6 @@ class TwoAgentPolicy(BasePolicy):
         (puck_batch, bar_batch) = batch
         puck_out = self.puck_policy.learn(puck_batch, **kwargs)
         bar_out = self.bar_policy.learn(bar_batch, **kwargs)
-
         return bar_out
 
     def post_process_fn(

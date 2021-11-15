@@ -83,8 +83,7 @@ class PSE(gym.Env):
         """Take one step in the common environment
 
         Args:
-            puck_action (float): Action for the puck. u_t_p in [-1, 1]
-            bar_action (float): Action for the bar. u_t_b in [-1, 1]
+            action (Dict[Str, Float]): Action to take in the environment by both puck and bar
 
         Returns:
             State: Current state of the environment
@@ -97,9 +96,9 @@ class PSE(gym.Env):
         info = None
         puck_pos, bar_pos, theta, v_ind = self.state
 
-        ##Clamp puck and bar actions between [-1, 1]
-        # puck_action = max(-1, min(1, action["puck"]))
-        # bar_action = max(-1, min(1, action["bar"]))
+        # puck_action (float): Action for the puck. u_t_p in [-1, 1]
+        # bar_action (float): Action for the bar. u_t_b in [-1, 1]
+        # Clamp puck and bar actions between [-1, 1]
         puck_action = np.clip(action["puck"], -1, 1)
         bar_action = np.clip(action["bar"], -1, 1)
 
@@ -168,8 +167,15 @@ class PSE(gym.Env):
             info,
         )  # returns result tuple after action is taken
 
-    # Resets the environment's random generators to enable reproducability.
     def reset(self, fullReset=False):
+        """Resets the environment to its initial state
+
+        Args:
+            fullReset (bool, optional): Whether to reset the random number generator. Defaults to False.
+
+        Returns:
+            tuple[Any, Any, Literal[0], Literal[3]]: Initial state of the environment after reset
+        """
         self.state = self.startState
         self.theta = 0
         self.v_ind = 0
@@ -182,10 +188,23 @@ class PSE(gym.Env):
 
     # Creates seeds and random generator for environment
     def seed(self, mainSeed):
+        """Seeds the random number generator of the environment
+
+        Args:
+            mainSeed (int): Main seed for the environment
+        """
         self.mainSeed = mainSeed  # Main seed
         self.rng = np.random.default_rng(seed=self.mainSeed)
 
     def bar_vertices(self, bar_pos):
+        """Returns vertices of the bar
+
+        Args:
+            bar_pos (Tuple(float)): Normalised coordinates of the bar
+
+        Returns:
+            List[Tuple]: List of 4 vertices corresponding to the bar
+        """
         bar_x, bar_y = bar_pos
         l, r = (
             bar_x - self.bar_width / 2,
@@ -263,6 +282,8 @@ class PSE(gym.Env):
         return self.viewer.render(return_rgb_array=mode == "rgb_array")
 
     def close(self):
+        """Closes the environment.
+        """
         if self.viewer:
             self.viewer.close()
             self.viewer = None

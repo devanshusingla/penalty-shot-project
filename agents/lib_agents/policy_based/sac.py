@@ -15,6 +15,8 @@ from torch._C import device
 
 
 class SAC:
+    """Implementation of SAC Policy
+    """
     def __init__(
         self,
         action_space,
@@ -43,6 +45,19 @@ class SAC:
         recurrent=False,
         **kwargs
     ):
+        """Creates an actor and two critic nets and returns an instance of SAC Policy initialised with them
+
+        Args:
+            actor_lr (float, optional): Learning rate for the actor. Defaults to 0.001.
+            critic_lr (float, optional): Learning rate for the critic. Defaults to 0.001.
+            tau (float, optional): Soft parameter for computing actions. Defaults to 0.005.
+            gamma (float, optional): Discount factor. Defaults to 1.0.
+            n_step (int, optional): Number of steps to look ahead. Defaults to 4.
+            recurrent (bool, optional): Whether to use recurrent implementation. Defaults to False.
+
+        Returns:
+            Instance of SAC Policy
+        """
         if recurrent:
             actor = RecurrentActorProb(
                 len(self.actor_hidden_shape),

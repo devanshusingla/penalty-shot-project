@@ -14,6 +14,7 @@ from utils.config import puck_params, bar_params, env_params
 import argparse
 import os
 
+# Maps algorithms to their respective classes
 algo_mapping = {
     "sine": SinePolicy,
     "random": RandomPolicy,
@@ -26,27 +27,50 @@ algo_mapping = {
     "td3": TD3,
 }
 
+# Global variables for policy ang arguments
 policy = None
 args = None
 
 def train_fn(epoch, env_step):
-        tot_steps = args.epoch * args.step_per_epoch
-        if args.eps_train_decay == "const":
-            eps = args.eps_train_final
-        elif args.eps_train_decay == "lin":
-            eps = args.eps_train - (env_step / tot_steps) * (
-                args.eps_train - args.eps_train_final
-            )
-        elif args.eps_train_decay == "exp":
-            eps = args.eps_train * (
-                (args.eps_train_final / args.eps_train) ** (env_step / tot_steps)
-            )
-        policy.set_eps(eps)
+    """Hook called at beginning of training
+
+    Args:
+        epoch (int): Epoch number
+        env_step (int): Step number in the environment
+    """
+    tot_steps = args.epoch * args.step_per_epoch
+    if args.eps_train_decay == "const":
+        eps = args.eps_train_final
+    elif args.eps_train_decay == "lin":
+        eps = args.eps_train - (env_step / tot_steps) * (
+            args.eps_train - args.eps_train_final
+        )
+    elif args.eps_train_decay == "exp":
+        eps = args.eps_train * (
+            (args.eps_train_final / args.eps_train) ** (env_step / tot_steps)
+        )
+    policy.set_eps(eps)
 
 def test_fn(epoch, env_step):
+    """Test hook function called while training
+
+    Args:
+        epoch (int): Epoch number
+        env_step (int): Step number in the environment
+    """
     policy.set_eps(args.eps_test)
 
 def save_checkpoint_fn(epoch: int, env_step: int, gradient_step: int):
+    """Function hook to save model
+
+    Args:
+        epoch (int): Epoch number
+        env_step (int): Step number in the environment
+        gradient_step (int): Step number in the gradient
+
+    Returns:
+        str: Path where to save the model/policy
+    """
     save_folder = "saved_policies/{}".format(args.run_id)
     if not os.path.isdir(save_folder):
         os.makedirs(save_folder)
@@ -66,6 +90,11 @@ def save_checkpoint_fn(epoch: int, env_step: int, gradient_step: int):
     return save_path
 
 def get_args():
+    """Retuns the arguments for the script
+
+    Returns:
+        Argument object
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--puck", type=str, default="sine", choices=list(algo_mapping.keys())
@@ -117,6 +146,11 @@ def get_args():
     return parser.parse_args()
 
 def init_and_call_policy():
+    """Initialises and calls policies for the agent puck and bar
+
+    Returns:
+        Tuple[Policy, Policy]: Returns the policies for puck and bar
+    """
     if "call_params" in puck_params[args.puck]:
         puck_params_init = (
             puck_params[args.puck]["init_params"]
@@ -152,6 +186,15 @@ def init_and_call_policy():
     return (policy_puck, policy_bar)
 
 def load_policy(policy_puck, policy_bar):
+    """Loads the policy if the load_puck_id and load_bar_id are not None
+
+    Args:
+        policy_puck (Policy): Puck policy to be loaded into
+        policy_bar (Policy): Bar policy to be loaded into
+
+    Returns:
+        Tuple[Policy, Policy]: Returns the policy after loading if any
+    """
     if args.load_puck_id is not None:
         print("Loading Puck Policy..")
         if args.device == "cuda":
@@ -188,6 +231,12 @@ def load_policy(policy_puck, policy_bar):
     return policy_puck, policy_bar
 
 def train():
+    """Trains the agent puck and bar
+
+    Raises:
+        Exception: If arguments are not set
+        Exception: If proper algorithm is not used with proper trainer
+    """
     if args is None:
         raise Exception("args not set")
 

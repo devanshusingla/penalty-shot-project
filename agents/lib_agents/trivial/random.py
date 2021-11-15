@@ -4,6 +4,11 @@ import numpy as np
 
 
 class RandomPolicy(BasePolicy):
+    """Implements the random policy.
+
+    Args:
+        BasePolicy (): The base policy class.
+    """
     def __init__(
         self, max_consecutive_steps: int, seed: int = 0, max_steps: int = 90, **kwargs
     ):
@@ -14,7 +19,15 @@ class RandomPolicy(BasePolicy):
         self.max_steps = max_steps
 
     def forward(self, batch: Batch, state=None, **kwargs):
-        # print(batch.info)
+        """Calculates and forwards the action to the environment
+
+        Args:
+            batch (Batch): Current batch
+            state (Any, optional): Unknown. Defaults to None.
+
+        Returns:
+            Batch: Batch containing the next action
+        """
         if not batch.info.is_empty():
             act = np.array([[self.actions[s // self.csteps]] for s in batch.info.steps])
         else:

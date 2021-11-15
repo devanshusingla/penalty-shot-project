@@ -9,6 +9,8 @@ from _thread import start_new_thread
 
 
 class MS:
+    """Mouse Slider Class
+    """
     def __init__(self, id, time_interval=0.5):
         self.id = id
         self.time_interval = time_interval

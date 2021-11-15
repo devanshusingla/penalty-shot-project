@@ -8,6 +8,11 @@ import numpy as np
 
 # https://github.com/thu-ml/tianshou/issues/192 to enable rendering wrapper
 class EnvWrapper(gym.Wrapper):
+    """Environment Wrapper to enable rendering, dsicretising, and modifying rewards
+
+    Args:
+        gym (): Gym Wrapper Class
+    """
     def __init__(
         self,
         env,
@@ -37,6 +42,17 @@ class EnvWrapper(gym.Wrapper):
         )
 
     def step(self, action):
+        """Steps into action after modifying the action and return obs,rew, done, info tuple after modifying suitably
+
+        Args:
+            action (Dict[str, float]): Dictionary of actions to step on
+
+        Raises:
+            Exception: if reward type is not identified
+
+        Returns:
+            Tuple[]: State, reward, done, info object
+        """
         for agent, k in self.discrete.items():
             if agent in self.discrete.keys():
                 action[agent] = unflatten(Discrete(self.discrete[agent]), action[agent])
@@ -44,6 +60,7 @@ class EnvWrapper(gym.Wrapper):
         obs, rew, done, info = self.env.step(action)
 
         if self.render:
+            # Enable rendering
             if self.render_count == 0:
                 self.env.render()
 
@@ -57,12 +74,14 @@ class EnvWrapper(gym.Wrapper):
         if self.modified_reward == None:
             rew = rew
         elif self.modified_reward == "exp":
+            # Transform reward to exponential reward function for the bar
             if done:
                 rew = (
                     2 * np.exp(-3 * (abs(obs[0] - obs[2]) + abs(obs[1] - obs[3])) ** 2)
                     - 1
                 )
         elif self.modified_reward == "puck_exp":
+            # Transform the reward to exponential reward function for the puck
             if done:
                 rew = (
                     2 * np.exp(-25 * (abs(obs[0] - obs[2]) + abs(obs[1] - obs[3])) ** 2)
@@ -75,6 +94,8 @@ class EnvWrapper(gym.Wrapper):
 
 
 class MakeEnv:
+    """Creates enviroment with gym make
+    """
     def __init__(self, **kwargs):
         self.args = kwargs
 
@@ -83,6 +104,15 @@ class MakeEnv:
 
 
 def make_envs(num_envs: int = 1, render_env_count: int = 1, **kwargs):
+    """Creates a list of environments with the first render_env_count environment allowed to render
+
+    Args:
+        num_envs (int, optional): Number of environments to create. Defaults to 1.
+        render_env_count (int, optional): Number of environments allowed to render. Defaults to 1.
+
+    Returns:
+        List[Env]: List of environments
+    """
     envs = [MakeEnv(render=True, **kwargs) for _ in range(render_env_count)] + [
         MakeEnv(render=False, **kwargs) for _ in range(num_envs - render_env_count)
     ]

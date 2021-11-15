@@ -9,6 +9,8 @@ from torch._C import device
 
 
 class DDPG:
+    """Implements the DDPG algorithm for penalty shot kick task problem
+    """
     def __init__(
         self,
         action_space,
@@ -29,6 +31,18 @@ class DDPG:
     def __call__(
         self, actor_lr=0.001, critic_lr=0.001, tau=0.005, gamma=1.0, n_step=4, **kwargs
     ):
+        """Creates the actor and critic net and returns an instance of DDPG Policy initialised with them
+
+        Args:
+            actor_lr (float, optional): Learning rate for the actor net. Defaults to 0.001.
+            critic_lr (float, optional): Learning rate for the critic net. Defaults to 0.001.
+            tau (float, optional): Parameter for soft update of the target network. Defaults to 0.005.
+            gamma (float, optional): Discount factor. Defaults to 1.0.
+            n_step (int, optional): Number of steps to look ahead. Defaults to 4.
+
+        Returns:
+            Instance of DDPG Policy
+        """
         actor_net = Net(
             self.state_shape, hidden_sizes=self.actor_hidden_shape, device=self.device
         )

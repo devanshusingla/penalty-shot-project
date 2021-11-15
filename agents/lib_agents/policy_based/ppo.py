@@ -8,10 +8,17 @@ from torch.distributions import Independent, Normal
 
 
 def dist(*logits):
+    """Distribution class used to compute actions
+
+    Returns:
+        Torch.nn.Distribution: A distribution clas derived from normal distribution
+    """
     return Independent(Normal(*logits), 1)
 
 
 class PPO:
+    """Implementation of the PPO Algorithm for the penalty shot task problem
+    """
     def __init__(self, state_shape, action_space, hidden_sizes=[128, 128], **kwargs):
         self.state_shape = state_shape
         self.action_space = action_space
@@ -20,6 +27,14 @@ class PPO:
         self.hidden_sizes = hidden_sizes
 
     def __call__(self, lr=1e-3, **kwargs):
+        """Creates actor and critic net and returns the PPO policy
+
+        Args:
+            lr (float, optional): Common learning rate for actor and critic net. Defaults to 1e-3.
+
+        Returns:
+            Instance of PPO Policy
+        """
         device = "cuda" if torch.cuda.is_available() else "cpu"
         actor_net = Net(self.state_shape, hidden_sizes=self.hidden_sizes, device=device)
         actor = ActorProb(
