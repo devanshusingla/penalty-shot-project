@@ -74,10 +74,10 @@ To support asynchronous inputs from agents, we have created a main server which 
 - A notebook demonstrating smurves
 
 ## Authors
-- Akshat Sharma (akshatsh at iitk dot ac dot in)
-- Devanshu Singla (dsingla at iitk dot ac dot in)
-- Naman Gupta (namangup at iitk dot ac dot in)
-- Sarthak Rout (sarthakr at iitk dot ac dot in)
+- [Akshat Sharma](https://github.com/akshatsh49) (akshatsh at iitk dot ac dot in)
+- [Devanshu Singla](https://github.com/devanshusingla) (dsingla at iitk dot ac dot in)
+- [Naman Gupta](https://github.com/namangup) (namangup at iitk dot ac dot in)
+- [Sarthak Rout](https://github.com/SarthakRout) (sarthakr at iitk dot ac dot in)
 ## Want to Contribute?
 We welcome everyone to report bugs, raise issues, add features etc. Drop a mail to the [authors](#authors) to discuss more.
 
