@@ -1,15 +1,10 @@
 __pycache__/
 *.py[cod]
-
 *.egg-info/
-
 sample_runs/
 .DS_Store
-
 wandb/
-
 opt_policy/
 .vscode/
 .ipynb_checkpoints/
-
 psp/

@@ -9,8 +9,8 @@ from tianshou.trainer import offpolicy_trainer, onpolicy_trainer
 from torch.serialization import save
 from agents import TwoAgentPolicy
 from agents.lib_agents import *
-from .envs import make_envs, MakeEnv
-from .config import puck_params, bar_params, env_params
+from utils.envs import make_envs, MakeEnv
+from utils.config import puck_params, bar_params, env_params
 import argparse
 import os
 
@@ -26,6 +26,44 @@ algo_mapping = {
     "td3": TD3,
 }
 
+policy = None
+args = None
+
+def train_fn(epoch, env_step):
+        tot_steps = args.epoch * args.step_per_epoch
+        if args.eps_train_decay == "const":
+            eps = args.eps_train_final
+        elif args.eps_train_decay == "lin":
+            eps = args.eps_train - (env_step / tot_steps) * (
+                args.eps_train - args.eps_train_final
+            )
+        elif args.eps_train_decay == "exp":
+            eps = args.eps_train * (
+                (args.eps_train_final / args.eps_train) ** (env_step / tot_steps)
+            )
+        policy.set_eps(eps)
+
+def test_fn(epoch, env_step):
+    policy.set_eps(args.eps_test)
+
+def save_checkpoint_fn(epoch: int, env_step: int, gradient_step: int):
+    save_folder = "saved_policies/{}".format(args.run_id)
+    if not os.path.isdir(save_folder):
+        os.makedirs(save_folder)
+
+    puck_file_path = "{}/puck_{}.pth".format(save_folder, args.puck)
+    print("saving puck")
+    torch.save(policy.puck_policy.state_dict(), puck_file_path)
+
+    bar_file_path = "{}/bar_{}.pth".format(save_folder, args.bar)
+    print("saving bar")
+    torch.save(policy.bar_policy.state_dict(), bar_file_path)
+
+    save_path = "{}/log".format(save_folder)
+    if not os.path.isfile(save_path):
+        with open(save_path, "w") as f:
+            pass
+    return save_path
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -70,7 +108,7 @@ def get_args():
     parser.add_argument("--wandb-entity", type=str, default="penalty-shot-project")
     parser.add_argument("--wandb-run-id", type=str, default=None)
 
-    parser.add_argument("--trainer", type=str, default="off", choices=["off", "on"])
+    parser.add_argument("--trainer", type=str, default="on", choices=["off", "on"])
     parser.add_argument("--save", action="store_true", default=False)
     parser.add_argument("--load-puck-id", type=str, default=None)
     parser.add_argument("--load-bar-id", type=str, default=None)
@@ -78,30 +116,7 @@ def get_args():
 
     return parser.parse_args()
 
-
-def train(args):
-
-    print(args.device)
-    # create env
-    env = MakeEnv(**env_params["train"]).create_env()
-
-    args.state_shape = env.observation_space.shape
-    args.action_shape = env.action_space.shape
-    # print("Observations shape:", env.observation_space, args.state_shape)
-    # print("Actions shape:", env.action_space, args.action_shape)
-
-    (train_envs_obj, train_envs) = make_envs(args.training_num, **env_params["train"])
-    train_envs = SubprocVectorEnv(train_envs)
-    (test_envs_obj, test_envs) = make_envs(args.test_num, **env_params["test"])
-    test_envs = SubprocVectorEnv(test_envs)
-
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    train_envs.seed(args.seed)
-    test_envs.seed(args.seed)
-
-    # define policies for puck and bar here
-
+def init_and_call_policy():
     if "call_params" in puck_params[args.puck]:
         puck_params_init = (
             puck_params[args.puck]["init_params"]
@@ -134,9 +149,11 @@ def train(args):
     else:
         policy_bar = algo_mapping[args.bar](**bar_params[args.bar])
 
-    # Loading policies
+    return (policy_puck, policy_bar)
 
+def load_policy(policy_puck, policy_bar):
     if args.load_puck_id is not None:
+        print("Loading Puck Policy..")
         if args.device == "cuda":
             policy_puck.load_state_dict(
                 torch.load(
@@ -154,6 +171,7 @@ def train(args):
             )
 
     if args.load_bar_id is not None:
+        print("Loading Bar Policy..")
         if args.device == "cuda":
             policy_bar.load_state_dict(
                 torch.load(
@@ -167,12 +185,42 @@ def train(args):
                     map_location=torch.device("cpu"),
                 )
             )
+    return policy_puck, policy_bar
+
+def train():
+    if args is None:
+        raise Exception("args not set")
+
+    print("Using device: ", args.device)
+    env = MakeEnv(**env_params["train"]).create_env()
+    args.state_shape = env.observation_space.shape
+    args.action_shape = env.action_space.shape
+
+    # Create training and testing environments
+    (train_envs_obj, train_envs) = make_envs(args.training_num, **env_params["train"])
+    train_envs = SubprocVectorEnv(train_envs)
+    (test_envs_obj, test_envs) = make_envs(args.test_num, **env_params["test"])
+    test_envs = SubprocVectorEnv(test_envs)
+    print(f"Created {args.training_num} training environments and {args.test_num} test environments..")
+
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    train_envs.seed(args.seed)
+    test_envs.seed(args.seed)
+
+    # define policies for puck and bar here
+    print("Initialising Policies..")
+    policy_puck, policy_bar = init_and_call_policy()
+    # Loading policies
+    policy_puck, policy_bar = load_policy(policy_puck, policy_bar)
+    # Create Two Agent Policy
     policy = TwoAgentPolicy(
         (policy_puck, policy_bar),
         observation_space=env.observation_space,
         action_space=env.action_space,
     )
 
+    print("Creating replay buffer with train and test collector..")
     if (args.puck == "sac" and puck_params["sac"]["call_params"]["recurrent"]) or (
         args.bar == "sac" and bar_params["sac"]["call_params"]["recurrent"]
     ):
@@ -200,46 +248,13 @@ def train(args):
         run_id=args.wandb_run_id,
     )
 
-    def train_fn(epoch, env_step):
-        tot_steps = args.epoch * args.step_per_epoch
-        if args.eps_train_decay == "const":
-            eps = args.eps_train_final
-        elif args.eps_train_decay == "lin":
-            eps = args.eps_train - (env_step / tot_steps) * (
-                args.eps_train - args.eps_train_final
-            )
-        elif args.eps_train_decay == "exp":
-            eps = args.eps_train * (
-                (args.eps_train_final / args.eps_train) ** (env_step / tot_steps)
-            )
-        policy.set_eps(eps)
-
-    def test_fn(epoch, env_step):
-        policy.set_eps(args.eps_test)
-
-    def save_checkpoint_fn(epoch: int, env_step: int, gradient_step: int):
-        save_folder = "saved_policies/{}".format(args.run_id)
-        if not os.path.isdir(save_folder):
-            os.makedirs(save_folder)
-
-        puck_file_path = "{}/puck_{}.pth".format(save_folder, args.puck)
-        print("saving puck")
-        torch.save(policy.puck_policy.state_dict(), puck_file_path)
-
-        bar_file_path = "{}/bar_{}.pth".format(save_folder, args.bar)
-        print("saving bar")
-        torch.save(policy.bar_policy.state_dict(), bar_file_path)
-
-        save_path = "{}/log".format(save_folder)
-        if not os.path.isfile(save_path):
-            with open(save_path, "w") as f:
-                pass
-        return save_path
-
     if not args.save:
         save_checkpoint_fn = None
 
-    if args.trainer == "off":
+    print("Starting training and testing model ..")
+    if (args.trainer == "off" 
+    and puck_params[args.puck].get("trainer", "off") == "off"
+    and bar_params[args.bar].get("trainer", "off") == "off"):
         result = offpolicy_trainer(
             policy,
             train_collector,
@@ -255,7 +270,9 @@ def train(args):
             update_per_step=args.update_per_step,
             save_checkpoint_fn=save_checkpoint_fn,
         )
-    elif args.trainer == "on":
+    elif (args.trainer == "on" 
+    and puck_params[args.puck].get("trainer", "on") == "on"
+    and bar_params[args.bar].get("trainer", "on") == "on"):
         result = ts.trainer.onpolicy_trainer(
             policy,
             train_collector,
@@ -270,6 +287,10 @@ def train(args):
             save_checkpoint_fn=save_checkpoint_fn,
         )
     else:
-        raise Exception("invalid trainer")
+        raise Exception("Invalid trainer with algorithm")
 
     pprint.pprint(result)
+
+if __name__ == "__main__":
+    args = get_args()
+    train()
