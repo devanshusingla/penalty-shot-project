@@ -1,13 +1,29 @@
 # Penalty Shot Task
 We create a platform to pit SOTA Deep Reinforcement Learning algorithms against each other on the Penalty Shot Kick task. The task involves two agents simulating an penalty shootout. Do check out our results [here](https://drive.google.com/file/d/1_xkMm-6JUh_VIgNew1a4vPjCpU2wdI5D/view?usp=sharing) and the references [here](#literature-references). This was part of a course project under Prof. Ashutosh Modi, CS698R, IITK - Deep Reinforcement Learning.
 
+## Table of Contents
+- [Features](#features)
+- [How to get started](#how-to-get-started)
+    - [Install packages](#install-packages)
+    - [Train and test a model](#train-and-test-a-model)
+    - [Play as bar](#to-play-as-bar)
+- [Codebase](#codebase)
+    - [Game Environment](#game-environment)
+    - [Agents](#agents)
+    - [Async Communication](#async-communication)
+    - [Examples](#examples)
+- [Authors](#authors)
+- [Want to contribute?](#want-to-contribute)
+- [Literature References](#literature-references)
+- [Acknowledgement](#acknowledgement)
+
 ## Features
 - Rendering of the custom environment at each step
 - Fully configurable environments and policies
 - Async server to play with a policy manually
 ## How to get started
 
-### Install all packages necessary to run the project
+### Install packages
 >The `-e` flag is included to make the project package editable
 
 >Login to `wandb.ai` to record your experimental runs 
@@ -25,7 +41,7 @@ wandb login
 python ./utils/train.py  --wandb-name "Name for Wandb Run" --training-num 1 --test-num 2 --puck ppo --bar ppo --load-puck-id both_ppo --load-bar-id both_ppo 
 ```
 
-### To play against the puck as bar:
+### To play as bar:
 Open 3 terminals and run 
 ```bash
 python ./examples/server/start_server.py
