@@ -21,6 +21,9 @@ We create a platform to pit SOTA Deep Reinforcement Learning algorithms against 
 - Rendering of the custom environment at each step
 - Fully configurable environments and policies
 - Async server to play with a policy manually
+
+[Back to TOC](#table-of-contents)
+
 ## How to get started
 
 ### Install packages
@@ -33,6 +36,8 @@ pip install -e ./gym-env
 wandb login
 ```
 
+[Back to TOC](#table-of-contents)
+
 ### Train and test a model
 > Use files in `utils/config/` to control configuration of agent specific policy hyper-parameters and environment parameters
 
@@ -40,6 +45,8 @@ wandb login
 ```bash
 python ./utils/train.py  --wandb-name "Name for Wandb Run" --training-num 1 --test-num 2 --puck ppo --bar ppo --load-puck-id both_ppo --load-bar-id both_ppo 
 ```
+
+[Back to TOC](#table-of-contents)
 
 ### To play as bar:
 Open 3 terminals and run 
@@ -54,32 +61,45 @@ python ./examples/server/agent_bar.py
 ```
 Click `Start` and use the mouse slider to control the direction of the bar.
 
+[Back to TOC](#table-of-contents)
+
 ## Codebase
 ### Game Environment
 It consists of a puck and a bar with puck moving towards bar at constant horizontal speed. Both of them are controlled by separate agents. The goal of puck is to move past bar and reach final line while the goal of bar is to catch puck before it can reach the final line.
 
-The environment has been developed using OpenAI Gym library which accepts two action parameters corresponding to puck and bar, and moves the game by one time step giving output a tuple of state, reward, completion state and extra information object. [See code](gym-env)
+The environment has been developed using OpenAI Gym library which accepts two action parameters corresponding to puck and bar, and moves the game by one time step giving output a tuple of state, reward, completion state and extra information object. [See code](gym-env) [Back to TOC](#table-of-contents)
 
 ### Agents
 - `lib-agents`: It features trivial, value based and policy based algorithms including `smurve`, `DQN`, `TD3`, `PPO` and `DDPG`.
 - `comm-agents`: It implements the hardcoded approach for finding a baseline and pure exploration strategy. It also implements the mouse slider.
 - Also implements a `TwoAgentPolicyWrapper` to combine policies for the puck and the agent.
-[See code](agents)
+[See code](agents) [Back to TOC](#table-of-contents)
+
+### Utils
+- Contains training script and utility functions implementing wrappers
+- Stores policy and environment configuration information. 
+[See code](utils) [Back to TOC](#table-of-contents)
 
 ### Async Communication
-To support asynchronous inputs from agents, we have created a main server which controls the environment. The agents using client class to connect to the server and use its step function to give their action and receive corresponding result tuple. The server takes actions from the agents as input and synchronizes them and updates the environment by one time step. [See code](communication)
+To support asynchronous inputs from agents, we have created a main server which controls the environment. The agents using client class to connect to the server and use its step function to give their action and receive corresponding result tuple. The server takes actions from the agents as input and synchronizes them and updates the environment by one time step. [See code](communication) [Back to TOC](#table-of-contents)
 
 ### Examples
 - Script for playing with the puck as a bar
 - A notebook demonstrating smurves
+[See Code](examples) [Back to TOC](#table-of-contents)
+
 
 ## Authors
 - [Akshat Sharma](https://github.com/akshatsh49) (akshatsh at iitk dot ac dot in)
 - [Devanshu Singla](https://github.com/devanshusingla) (dsingla at iitk dot ac dot in)
 - [Naman Gupta](https://github.com/namangup) (namangup at iitk dot ac dot in)
 - [Sarthak Rout](https://github.com/SarthakRout) (sarthakr at iitk dot ac dot in)
+
+[Back to TOC](#table-of-contents)
 ## Want to Contribute?
 We welcome everyone to report bugs, raise issues, add features etc. Drop a mail to the [authors](#authors) to discuss more.
+
+[Back to TOC](#table-of-contents)
 
 ## Literature References
 - McDonald, K.R., Broderick, W.F., Huettel, S.A. et al. Bayesian nonparametric models characterize instantaneous strategies in a competitive dynamic game. Nat Commun 10, 1808 (2019). https://doi.org/10.1038/s41467-019-09789-4
@@ -87,9 +107,12 @@ We welcome everyone to report bugs, raise issues, add features etc. Drop a mail 
 - Kelsey R McDonald, John M Pearson, Scott A Huettel, Dorsolateral and dorsomedial prefrontal cortex track distinct properties of dynamic social behavior, Social Cognitive and Affective Neuroscience, Volume 15, Issue 4, April 2020, Pages 383–393, https://doi.org/10.1093/scan/nsaa053
 - He He, Jordan Boyd-Graber, Kevin Kwok and Hal Daumé III. Opponent Modeling in Deep Reinforcement Learning. ArXiv:1609.05559
 
+[Back to TOC](#table-of-contents)
 ## Acknowledgement
 - We thank Prof. Ashutosh Modi for providing us with this opportunity to explore and learn more about SOTA algorithms through a project.
 - We thank our mentor, Avisha Gaur for guiding us and clarifying our doubts related to the environment
 - We thank our TA, Gagesh Madaan for providing valuable inputs regarding various solution approaches.
 - We also thank the creators of Tianshou and OpenAI Gym library which forms a core part of our codebase
 - We thank the open source community for wonderful libraries for everything under the sun! 
+
+[Back to TOC](#table-of-contents)
