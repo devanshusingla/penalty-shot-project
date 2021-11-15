@@ -93,7 +93,8 @@ class PSServer:
 
         print("starting the game")
 
-        state, done = self.env.reset()
+        done = False
+        state = self.env.reset()
 
         self.puck.send(pickle.dumps((state, done)))
         self.bar.send(pickle.dumps((state, done)))
@@ -115,8 +116,11 @@ class PSServer:
                 print("agent bar disconnected")
                 break
             bar_action = pickle.loads(msg)
-
-            res = self.env.step(puck_action, bar_action)
+            action = {
+                "puck": puck_action,
+                "bar" : bar_action
+            }
+            res = self.env.step(action)
             self.puck.send(pickle.dumps(res))
             self.bar.send(pickle.dumps(res))
 
@@ -141,6 +145,7 @@ class PSServer:
         if self.save_run:
             print("Saving run ...")
             self.save_render(frames)
+        exit()
 
     def save_render(self, frames):
         plt.figure(

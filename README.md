@@ -1,8 +1,8 @@
-# Penalty Shot Project
+# Penalty Shot Task
 
 ## How to Setup and Run the Environment
 
-### Install tianshou and install gym-env
+### Install all packages necessary to run the project
 ```bash
 pip install tianshou
 pip install gym==0.19 -U

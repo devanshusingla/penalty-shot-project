@@ -31,7 +31,6 @@ class MS:
                 break
 
             state, reward, done, info = res
-            print(state, reward, done)
 
         agent.close()
 

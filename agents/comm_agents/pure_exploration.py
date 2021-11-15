@@ -13,7 +13,7 @@ class PE:
             return
 
         state, done = res
-        print(state, done)
+        # print(state, done)
 
         rnd = np.random.default_rng(seed=seed)
         while not done:
@@ -23,7 +23,7 @@ class PE:
                 break
 
             state, reward, done, info = res
-            print(state, reward)
+            # print(state, reward)
 
         self.agent.close()
 
@@ -37,7 +37,7 @@ class move_up:
 
         while not done:
             state, reward, done, info = self.agent.step(1)
-            print(state, reward)
+            # print(state, reward)
 
         self.agent.close()
 
@@ -75,6 +75,6 @@ class move_sine:
             )
             action = max(-1, min(1, action))
 
-            print(state, reward)
+            # print(state, reward)
 
         self.agent.close()
