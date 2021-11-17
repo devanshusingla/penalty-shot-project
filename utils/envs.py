@@ -3,7 +3,9 @@ from gym.spaces import Tuple, Discrete, Dict
 from gym.spaces.box import Box
 from gym.spaces.utils import flatten_space, unflatten
 from gym.wrappers import FlattenObservation
-
+import matplotlib.pyplot as plt
+from matplotlib import animation
+import os
 import numpy as np
 
 # https://github.com/thu-ml/tianshou/issues/192 to enable rendering wrapper
@@ -21,9 +23,12 @@ class EnvWrapper(gym.Wrapper):
         render_skip_ep: int = 100,
         discrete: dict = {},
         modified_reward: str = "exp",
+        save_render_path: str = None
     ):
         super().__init__(FlattenObservation(env))
         self.render = render
+        self.save_render_path = save_render_path
+        self.frames = []
         if render:
             self.render_count = 0
             self.render_skip_ep = render_skip_ep
@@ -62,15 +67,21 @@ class EnvWrapper(gym.Wrapper):
 
         if self.render:
             # Enable rendering
-            if self.render_count == 0:
-                self.env.render()
-
-            if done:
+            if not self.save_render_path:
                 if self.render_count == 0:
-                    self.env.close()
+                    self.env.render()
 
-                self.render_count += 1
-                self.render_count %= self.render_skip_ep
+                if done:
+                    if self.render_count == 0:
+                        self.env.close()
+
+                    self.render_count += 1
+                    self.render_count %= self.render_skip_ep
+            else:
+                if not done:
+                    self.frames.append(self.env.render(mode="rgb_array"))
+                else:
+                    self.env.close()
 
         if self.modified_reward == None:
             rew = rew
@@ -92,6 +103,39 @@ class EnvWrapper(gym.Wrapper):
             raise Exception("Unidentified reward type")
 
         return obs, rew, done, info
+    
+    def save_render(self):
+        plt.figure(
+            figsize=(self.frames[0].shape[1] / 150.0, self.frames[0].shape[0] / 150.0), dpi=150
+        )
+
+        plt.axis("off")
+        patch = plt.imshow(self.frames[0])
+
+        def animate(i):
+            patch.set_data(self.frames[i])
+
+        anim = animation.FuncAnimation(
+            plt.gcf(), animate, frames=len(self.frames), interval=1
+        )
+        writergif = animation.PillowWriter(fps=120)
+
+        # check if folder exists
+        index = self.save_render_path.rfind("/")
+        folder_name = self.save_render_path[: index + 1]
+        if not os.path.isdir(folder_name):
+            print("Made folder {}".format(folder_name))
+            os.mkdir(folder_name)
+
+        anim.save(self.save_render_path, writer=writergif)
+
+    def close(self):
+        """Close the environment"""
+        if self.render:
+            if self.save_render_path:
+                self.save_render()
+                self.frames = []
+        self.env.close()
 
 
 class MakeEnv:
