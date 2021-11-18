@@ -12,6 +12,7 @@ We create a platform to pit SOTA Deep Reinforcement Learning algorithms against 
     - [Agents](#agents)
     - [Async Communication](#async-communication)
     - [Examples](#examples)
+- [Rendered Videos](saved_renders)
 - [Authors](#authors)
 - [Want to contribute?](#want-to-contribute)
 - [Literature References](#literature-references)
