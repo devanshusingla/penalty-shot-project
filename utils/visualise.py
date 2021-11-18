@@ -147,7 +147,7 @@ def get_args():
     parser.add_argument("--load-bar-id", type=str, default=None)
     parser.add_argument("--run-id", type=str, default=None)
     parser.add_argument("--save-render", type=str, default=None)
-
+    parser.add_argument("--num-episodes-render", type=int, default=10)
     return parser.parse_args()
 
 
@@ -282,7 +282,7 @@ def visualise():
     test_collector = Collector(
         policy, test_envs, exploration_noise=args.exploration_noise
     )
-    print(test_collector.collect(n_episode=3))
+    print(test_collector.collect(n_episode=args.num_episodes_render))
     test_envs.close()
 
 if __name__ == "__main__":

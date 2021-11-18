@@ -118,7 +118,6 @@ class EnvWrapper(gym.Wrapper):
         anim = animation.FuncAnimation(
             plt.gcf(), animate, frames=len(self.frames), interval=1
         )
-        writergif = animation.PillowWriter(fps=120)
 
         # check if folder exists
         index = self.save_render_path.rfind("/")
@@ -126,8 +125,9 @@ class EnvWrapper(gym.Wrapper):
         if not os.path.isdir(folder_name):
             print("Made folder {}".format(folder_name))
             os.mkdir(folder_name)
-
-        anim.save(self.save_render_path, writer=writergif)
+        import matplotlib as mpl
+        mpl.rcParams['animation.ffmpeg_path'] = r'D:\\Downloads1.9\\ffmpeg-2021-11-15-git-9e8cdb24cd-essentials_build\\bin\\ffmpeg.exe'
+        anim.save(self.save_render_path, writer='ffmpeg', fps=60)
 
     def close(self):
         """Close the environment"""
