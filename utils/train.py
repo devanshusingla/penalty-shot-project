@@ -222,11 +222,11 @@ def train(args):
         if not os.path.isdir(save_folder):
             os.makedirs(save_folder)
 
-        puck_file_path = "{}/puck_{}.pth".format(save_folder, args.puck)
+        puck_file_path = "{}/puck_{}_{}.pth".format(save_folder, args.puck, epoch)
         print("saving puck")
         torch.save(policy.puck_policy.state_dict(), puck_file_path)
 
-        bar_file_path = "{}/bar_{}.pth".format(save_folder, args.bar)
+        bar_file_path = "{}/bar_{}_{}.pth".format(save_folder, args.bar, epoch)
         print("saving bar")
         torch.save(policy.bar_policy.state_dict(), bar_file_path)
 

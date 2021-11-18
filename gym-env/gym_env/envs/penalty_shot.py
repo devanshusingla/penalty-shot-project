@@ -159,7 +159,7 @@ class PSE(gym.Env):
 
         self.state = ((puck_x, puck_y), (bar_x, bar_y), self.theta, self.v_ind + 3)
         self.step_count += 1
-        info = {"steps": self.step_count}
+        info = {"steps": self.step_count}#, "puck_y": puck_y, "bar_y": bar_y}
 
         return (
             self.state,

@@ -4,7 +4,7 @@ from tianshou.utils.net.continuous import (
     Actor,
     Critic,
 )
-from tianshou.exploration import GaussianNoise
+from tianshou.exploration import GaussianNoise, OUNoise
 
 import torch, numpy as np
 from torch import nn
@@ -84,7 +84,7 @@ class TD3:
             tau=tau,
             gamma=gamma,
             estimation_step=n_step,
-            exploration_noise=GaussianNoise(sigma=exploration_noise),
+            exploration_noise=OUNoise(),
             policy_noise=policy_noice,
             update_actor_freq=update_actor_freq,
             noise_clip=noise_clip,

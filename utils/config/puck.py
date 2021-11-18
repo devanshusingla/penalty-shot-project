@@ -55,7 +55,7 @@ puck_params = {
         },
         "call_params": {
             "actor_lr": 0.001,
-            "critic_lr": 0.001,
+            "critic_lr": 0.002,
             "tau": 0.005,
             "gamma": 1.0,
             "n_step": 4,

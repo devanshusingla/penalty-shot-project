@@ -2,7 +2,7 @@ from tianshou.data.batch import Batch
 from tianshou.policy import BasePolicy
 import numpy as np
 from smurves import surgebinder
-
+import time
 
 class SmurvePolicy(BasePolicy):
     def __init__(
@@ -12,14 +12,15 @@ class SmurvePolicy(BasePolicy):
         **kwargs
     ):
         super().__init__(**kwargs)
-        self.rng = np.random.default_rng(seed)
+        self.rng = np.random.default_rng(time.time_ns())
         self.max_steps = max_steps
         self.param = {}
 
     def _get_action(self, info_batch: Batch, done_batch: Batch):
         act = np.empty(info_batch.shape[0])
         for i, (info, done) in enumerate(zip(info_batch, done_batch)):
-            if info.env_id not in self.param or done:
+            if info.env_id not in self.param or info.steps > 87:
+                # print("inside: ", info.env_id)
                 self.param[info.env_id] = self.gen_traj()
             act[i] = self.param[info.env_id][info.steps]
 
@@ -29,9 +30,9 @@ class SmurvePolicy(BasePolicy):
         # print(batch.info)
         if not batch.info.is_empty():
             act = self._get_action(batch.info, batch.done)
+            # print("changed: ", batch.info.env_id)
         else:
             act = np.zeros(batch.obs.shape[0])
-        # print(act)
         return Batch(act=act, state=None)
 
     def learn(self, batch: Batch, **kwargs):

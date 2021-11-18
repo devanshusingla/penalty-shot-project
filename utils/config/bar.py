@@ -57,7 +57,7 @@ bar_params = {
             "device": "cuda" if torch.cuda.is_available() else "cpu",
         },
         "call_params": {
-            "actor_lr": 0.001,
+            "actor_lr": 0.0005,
             "critic_lr": 0.001,
             "tau": 0.005,
             "gamma": 1.0,
